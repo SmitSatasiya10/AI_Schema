@@ -1,0 +1,14 @@
+{
+    "id": "media_slider",
+    "label": "Media Slider",
+    "purpose": "Slideshow of images or videos",
+    "settings": {
+        "image_1": "image_picker",
+        "image_2": "image_picker",
+        "image_3": "image_picker",
+        "autoplay": "checkbox",
+        "show_arrows": "checkbox",
+        "show_dots": "checkbox"
+    },
+    "_notes": "Media slider block creates image carousel. Can hold multiple images with autoplay and navigation options."
+}

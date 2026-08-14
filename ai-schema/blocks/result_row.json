@@ -1,0 +1,15 @@
+{
+    "id": "row",
+    "label": "Result Row",
+    "purpose": "Individual result/statistic row with percentage",
+    "settings": {
+        "percentage": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 90
+        },
+        "row_heading": "text",
+        "row_text": "richtext"
+    }
+}

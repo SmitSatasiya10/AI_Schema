@@ -1,0 +1,18 @@
+{
+    "id": "image",
+    "label": "Image",
+    "purpose": "Image block for content sections",
+    "settings": {
+        "image": "image_picker",
+        "width": [
+            "full",
+            "half",
+            "third"
+        ],
+        "alignment": [
+            "left",
+            "center",
+            "right"
+        ]
+    }
+}

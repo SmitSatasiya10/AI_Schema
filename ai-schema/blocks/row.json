@@ -1,0 +1,25 @@
+{
+    "id": "row",
+    "label": "Row",
+    "purpose": "Generic row block used in multiple sections with different field requirements",
+    "_notes": "IMPORTANT: The 'row' block has DIFFERENT settings depending on the section. For 'results' section: percentage (number), row_heading (text), row_text (richtext - MUST wrap with <p> tags). For 'comparison-table' section: benefit (inline_richtext), us, others, others_2, others_3 (all checkboxes). Check which section you're adding blocks to!",
+    "settings": {
+        "_for_results_section": {
+            "percentage": {
+                "type": "number",
+                "min": 0,
+                "max": 100,
+                "default": 90
+            },
+            "row_heading": "text",
+            "row_text": "richtext"
+        },
+        "_for_comparison_table_section": {
+            "benefit": "inline_richtext",
+            "us": "checkbox",
+            "others": "checkbox",
+            "others_2": "checkbox",
+            "others_3": "checkbox"
+        }
+    }
+}

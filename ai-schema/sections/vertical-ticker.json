@@ -1,0 +1,30 @@
+{
+    "id": "vertical-ticker",
+    "label": "Vertical Ticker",
+    "purpose": "Scrolling text ticker that moves vertically",
+    "allowed_on": [
+        "index",
+        "page",
+        "product"
+    ],
+    "settings": {
+        "speed": {
+            "type": "range",
+            "min": 1,
+            "max": 10,
+            "default": 5
+        },
+        "direction": [
+            "up",
+            "down"
+        ],
+        "pause_on_hover": [
+            "true",
+            "false"
+        ]
+    },
+    "allowed_blocks": [
+        "text"
+    ],
+    "_notes": "Vertical ticker displays scrolling text vertically. Add multiple 'text' blocks for different messages. Good for announcements or promotional messages."
+}

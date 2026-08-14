@@ -1,0 +1,9 @@
+{
+    "id": "collection",
+    "label": "Collection",
+    "purpose": "Feature a collection",
+    "settings": {
+        "collection": "collection_picker"
+    },
+    "_notes": "Collection block for collage section. Select a collection to feature."
+}

@@ -1,0 +1,19 @@
+{
+    "id": "input_row",
+    "label": "Input Field",
+    "purpose": "Form input field block",
+    "settings": {
+        "label": "text",
+        "field_type": [
+            "text",
+            "email",
+            "phone",
+            "number"
+        ],
+        "required": [
+            "true",
+            "false"
+        ],
+        "placeholder": "text"
+    }
+}

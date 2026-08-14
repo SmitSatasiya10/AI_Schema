@@ -1,0 +1,268 @@
+{
+  "sections": {
+    "main-product": {
+      "type": "main-product",
+      "settings": {
+        "enable_sticky_info": true,
+        "media_position": "left",
+        "gallery_layout": "stacked",
+        "media_size": "large",
+        "mobile_thumbnails": "show",
+        "hide_variants": false,
+        "enable_video_looping": true
+      },
+      "blocks": {
+        "award-badge-1": {
+          "type": "product_award-badge",
+          "settings": {
+            "badge_text": "Vet Recommended",
+            "badge_style": "ribbon",
+            "badge_color": "gold",
+            "position": "top-left",
+            "show_icon": true,
+            "icon": "verified"
+          }
+        },
+        "review-avatars-1": {
+          "type": "review-avatars",
+          "settings": {
+            "visibility": "always-display",
+            "enable_layout": true,
+            "alignment": "start",
+            "avatars_position": "left",
+            "avatar_size": 40,
+            "avatar_offset": -10,
+            "avatar_1_verified": true,
+            "avatar_2_verified": true,
+            "avatar_3_verified": true,
+            "text_1_line_1": "<strong>2,847 reviews</strong>",
+            "text_1_line_2": "[stars] 4.8 out of 5",
+            "text_2_line_1": "",
+            "text_2_line_2": ""
+          }
+        },
+        "title": {
+          "type": "product_title",
+          "settings": {
+            "uppercase_title": false,
+            "desktop_size": 39,
+            "mobile_size": 28,
+            "alignment": "left",
+            "mobile_alignment": "mobile-left",
+            "margin_top": 15,
+            "margin_bottom": 15
+          }
+        },
+        "price": {
+          "type": "product_price",
+          "settings": {
+            "price_layout": "price-first-vertical",
+            "price_color": "text",
+            "compare_price_color": "accent-1",
+            "regular_price_size": 28,
+            "sale_price_size": 22
+          }
+        },
+        "description": {
+          "type": "product_description",
+          "settings": {
+            "show_full_description": true,
+            "show_read_more": false,
+            "text_alignment": "left",
+            "style": "body"
+          }
+        },
+        "benefit-1": {
+          "type": "icon_with_text",
+          "settings": {
+            "icon": "spa",
+            "filled_icon": true,
+            "title": "100% Organic Ingredients",
+            "text": "<p>USDA certified organic chicken, vegetables, and ancient grains. No artificial preservatives or fillers.</p>"
+          }
+        },
+        "benefit-2": {
+          "type": "icon_with_text",
+          "settings": {
+            "icon": "verified",
+            "filled_icon": true,
+            "title": "Vet Formulated",
+            "text": "<p>Developed with board-certified veterinary nutritionists to meet AAFCO standards for all life stages.</p>"
+          }
+        },
+        "subscription": {
+          "type": "product_subscription",
+          "settings": {
+            "show_subscription_option": true,
+            "subscription_discount": 15,
+            "frequency_options": "14,30,60",
+            "default_frequency": 30,
+            "preselect_subscription": true
+          }
+        },
+        "variant-picker": {
+          "type": "product_product-variant-picker-block",
+          "settings": {
+            "picker_types": "pills, pills, pills",
+            "swatches_size": "large",
+            "skip_unavailable": true
+          }
+        },
+        "quantity": {
+          "type": "product_quantity-selector",
+          "settings": {
+            "style": "normal",
+            "enable_quantity_discounts": true,
+            "headline": "BUNDLE & SAVE",
+            "preselected": "none",
+            "full_width_classic": false
+          }
+        },
+        "buy-buttons": {
+          "type": "product_buy-buttons",
+          "settings": {
+            "show_add_to_cart": true,
+            "add_to_cart_label": "Add to cart",
+            "show_dynamic_checkout": true,
+            "show_quantity_selector": false,
+            "button_style": "solid",
+            "full_width": true
+          }
+        },
+        "shipping-checkpoints": {
+          "type": "product_shipping-checkpoints",
+          "settings": {
+            "icon_1": "local_shipping",
+            "text_1": "<p>Free shipping on orders over $35</p>",
+            "icon_2": "verified",
+            "text_2": "<p>100% satisfaction guarantee</p>",
+            "icon_3": "autorenew",
+            "text_3": "<p>Skip, pause, or cancel anytime</p>",
+            "icon_size": 24
+          }
+        },
+        "payment": {
+          "type": "payment-badges",
+          "settings": {
+            "show_payment_icons": true,
+            "payment_icon_style": "color"
+          }
+        },
+        "tabs": {
+          "type": "product_tabs",
+          "settings": {
+            "visibility": "always-display",
+            "tab_text_size": 16,
+            "tab_text_size_mobile": 14,
+            "button_alignment": "left",
+            "divider_thickness": 2,
+            "active_indicator_thickness": 3,
+            "content_size": 16,
+            "margin_top": 30,
+            "margin_bottom": 30
+          },
+          "blocks": {
+            "tab-feeding": {
+              "type": "tab_content",
+              "settings": {
+                "title": "Feeding Guide",
+                "icon": "restaurant",
+                "content": "<p><strong>Puppies (2-12 months):</strong> Feed 3-4 times daily, 1/2 to 2 cups per meal depending on breed size.</p><p><strong>Adults (1-7 years):</strong> Feed twice daily, 1 to 3 cups per meal based on weight and activity level.</p><p><strong>Seniors (7+ years):</strong> Feed twice daily, slightly reduced portions. Consult your vet for specific needs.</p><p>Always provide fresh water. Transition over 7 days mixing with previous food.</p>"
+              }
+            },
+            "tab-ingredients": {
+              "type": "tab_content",
+              "settings": {
+                "title": "Ingredients",
+                "icon": "eco",
+                "content": "<p><strong>Primary Ingredients:</strong> Organic free-range chicken, organic sweet potatoes, organic peas, organic lentils, organic chicken liver.</p><p><strong>Superfood Blend:</strong> Organic blueberries, organic spinach, organic kale, organic pumpkin.</p><p><strong>Supplements:</strong> Salmon oil, vitamin E, zinc proteinate, iron proteinate, copper proteinate.</p><p>Certified Organic by USDA. No corn, wheat, soy, or artificial ingredients.</p>"
+              }
+            },
+            "tab-shipping": {
+              "type": "tab_content",
+              "settings": {
+                "title": "Shipping & Returns",
+                "icon": "local_shipping",
+                "content": "<p><strong>Shipping:</strong> Orders ship within 1-2 business days. Free shipping on orders over $35. Subscription orders always ship free.</p><p><strong>Returns:</strong> 30-day satisfaction guarantee. If your dog doesn't love it, contact us for a full refund or exchange.</p><p><strong>Subscription Management:</strong> Modify, skip, or cancel your subscription anytime from your account dashboard.</p>"
+              }
+            }
+          },
+          "block_order": [
+            "tab-feeding",
+            "tab-ingredients",
+            "tab-shipping"
+          ]
+        },
+        "faq-1": {
+          "type": "collapsible-row",
+          "settings": {
+            "heading": "Is this suitable for puppies?",
+            "content": "<p>Yes! Our formula meets AAFCO nutritional standards for all life stages, including growth for puppies. We recommend the feeding guidelines specific to puppies (under 12 months) found in our feeding guide tab. The smaller kibble size and balanced nutrients support healthy development.</p>",
+            "icon": "info",
+            "open": false,
+            "heading_size": 16,
+            "margin_top": 15,
+            "margin_bottom": 15
+          }
+        },
+        "faq-2": {
+          "type": "collapsible-row",
+          "settings": {
+            "heading": "How long does an opened bag stay fresh?",
+            "content": "<p>Unopened bags have a shelf life of 12 months from the production date. Once opened, we recommend using the food within 6 weeks for optimal freshness. Reseal the bag tightly after each use and store in a cool, dry place away from direct sunlight. For maximum freshness, you can store the bag in an airtight container.</p>",
+            "icon": "package",
+            "open": false,
+            "heading_size": 16,
+            "margin_top": 15,
+            "margin_bottom": 15
+          }
+        },
+        "faq-3": {
+          "type": "collapsible-row",
+          "settings": {
+            "heading": "What if my dog doesn't like the food?",
+            "content": "<p>We offer a 30-day satisfaction guarantee. If your dog isn't completely satisfied, contact our customer care team for a full refund or exchange. For picky eaters, we recommend transitioning gradually over 7-10 days and mixing with their previous food. Most dogs love the taste, but we're here to help if yours needs time to adjust.</p>",
+            "icon": "return",
+            "open": false,
+            "heading_size": 16,
+            "margin_top": 15,
+            "margin_bottom": 15
+          }
+        },
+        "share": {
+          "type": "product_share-button",
+          "settings": {
+            "share_label": "Share with fellow dog parents",
+            "platforms": "facebook,twitter,pinterest,email,copy-link",
+            "button_style": "icon-text",
+            "button_size": "medium",
+            "layout": "horizontal"
+          }
+        }
+      },
+      "block_order": [
+        "award-badge-1",
+        "review-avatars-1",
+        "title",
+        "price",
+        "description",
+        "benefit-1",
+        "benefit-2",
+        "subscription",
+        "variant-picker",
+        "quantity",
+        "buy-buttons",
+        "shipping-checkpoints",
+        "payment",
+        "tabs",
+        "faq-1",
+        "faq-2",
+        "faq-3",
+        "share"
+      ]
+    }
+  },
+  "order": [
+    "main-product"
+  ]
+}

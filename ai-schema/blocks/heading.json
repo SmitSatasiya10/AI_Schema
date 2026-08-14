@@ -1,0 +1,14 @@
+{
+    "id": "heading",
+    "label": "Heading",
+    "purpose": "Text heading block",
+    "settings": {
+        "title": "inline_richtext",
+        "heading_size": [
+            "h0",
+            "h1",
+            "h2",
+            "h3"
+        ]
+    }
+}

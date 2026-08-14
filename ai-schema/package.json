@@ -1,0 +1,23 @@
+{
+    "name": "shopify-ai-theme-configurator",
+    "version": "1.0.0",
+    "description": "AI-powered Shopify theme configuration using schema constraints",
+    "main": "example-implementation.js",
+    "scripts": {
+        "generate": "node 1-generate-theme.js",
+        "menu": "node 3-interactive-menu.js",
+        "copy": "node 2-copy-to-theme.js",
+        "start": "node 3-interactive-menu.js"
+    },
+    "keywords": [
+        "shopify",
+        "ai",
+        "theme",
+        "openrouter"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "dotenv": "^16.3.1"
+    }
+}

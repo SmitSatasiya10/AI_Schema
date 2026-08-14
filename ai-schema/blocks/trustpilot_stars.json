@@ -1,0 +1,10 @@
+{
+    "id": "trustpilot_stars",
+    "label": "Trustpilot Stars",
+    "purpose": "Display Trustpilot rating stars",
+    "settings": {
+        "trustpilot_url": "url",
+        "show_rating_text": "checkbox"
+    },
+    "_notes": "Trustpilot stars block shows Trustpilot rating. Requires Trustpilot URL. Displays star rating and optional text."
+}

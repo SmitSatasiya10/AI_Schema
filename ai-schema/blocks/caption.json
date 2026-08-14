@@ -1,0 +1,13 @@
+{
+    "id": "caption",
+    "label": "Caption",
+    "purpose": "Small caption text block",
+    "settings": {
+        "text": "text",
+        "text_style": [
+            "subtitle",
+            "caption-with-letter-spacing",
+            "uppercase"
+        ]
+    }
+}

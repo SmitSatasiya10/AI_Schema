@@ -1,0 +1,13 @@
+{
+    "id": "email_signup",
+    "label": "Email Signup",
+    "purpose": "Email newsletter signup form",
+    "settings": {
+        "heading": "text",
+        "subheading": "text",
+        "button_label": "text",
+        "placeholder": "text",
+        "show_name_field": "checkbox"
+    },
+    "_notes": "Email signup block for newsletter. Captures email addresses. Optional name field can be enabled."
+}

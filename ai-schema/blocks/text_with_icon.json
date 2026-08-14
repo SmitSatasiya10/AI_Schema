@@ -1,0 +1,11 @@
+{
+    "id": "text_with_icon",
+    "label": "Text with Icon",
+    "purpose": "Text line with icon prefix",
+    "settings": {
+        "icon": "text",
+        "text": "text",
+        "icon_color": "color"
+    },
+    "_notes": "Text with icon block shows icon followed by text inline. Use Material Symbols icon names. Good for feature lists or bullet points."
+}
