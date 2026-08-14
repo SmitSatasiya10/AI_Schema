@@ -35,11 +35,11 @@
       data-country-list-error="{{ settings.country_invalid_error_msg }}"
       data-animations-type="{{ settings.animations_type }}"
       data-store="{{ shop.permanent_domain }}"></script> {% endcomment %}
-    <script
+    {% comment %} <script
       src="{{ 'secondary.js' | asset_url }}"
       defer="defer"
       data-defer="true"
-      data-is-rtl="{{ is_rtl }}"></script>
+      data-is-rtl="{{ is_rtl }}"></script> {% endcomment %}
 
     <link
       rel="preconnect"

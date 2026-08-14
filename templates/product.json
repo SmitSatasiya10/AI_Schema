@@ -81,7 +81,7 @@
           }
         },
         "benefit-1": {
-          "type": "icon_with_text",
+          "type": "icon-with-text",
           "settings": {
             "icon": "spa",
             "filled_icon": true,
@@ -90,7 +90,7 @@
           }
         },
         "benefit-2": {
-          "type": "icon_with_text",
+          "type": "icon-with-text",
           "settings": {
             "icon": "verified",
             "filled_icon": true,

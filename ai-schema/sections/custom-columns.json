@@ -23,21 +23,21 @@
     },
     "allowed_blocks": [
         "heading",
-        "paragraph",
+        "text",
         "image",
         "video",
         "buttons",
-        "icon_with_text",
-        "rating_stars",
-        "countdown_timer",
-        "email_signup",
-        "custom_liquid",
-        "accordion",
-        "media_slider",
-        "payment_badges",
-        "atc_button",
-        "text_with_icon",
-        "trustpilot_stars"
+        "icon-with-text",
+        "rating-stars",
+        "countdown-timer",
+        "email-signup",
+        "custom-liquid",
+        "collapsible-row",
+        "media-slider",
+        "payment-badges",
+        "atc-button",
+        "text-with-icon",
+        "trustpilot-stars"
     ],
-    "_notes": "Custom columns is a legacy flexible layout section where blocks can be distributed across multiple columns. Each block has a 'column' setting (col_1 to col_6) to specify which column it belongs to. Use this for complex multi-column layouts."
+    "_notes": "Custom columns is a legacy flexible layout section where blocks can be distributed across multiple columns. Each block has a 'column' setting (col_1 to col_6) to specify which column it belongs to. Use this for complex multi-column layouts. Use EXACT block names as listed in allowed_blocks above (hyphens matter): 'icon-with-text' NOT 'icon_with_text', 'rating-stars' NOT 'rating_stars', 'payment-badges' NOT 'payment_badges', 'collapsible-row' NOT 'accordion'."
 }

@@ -368,13 +368,13 @@
         "collage-image-1": {
           "type": "image",
           "settings": {
-            "image": "vegan-bowl.jpg"
+            "image": ""
           }
         },
         "collage-image-2": {
           "type": "image",
           "settings": {
-            "image": "cooking-scene.jpg"
+            "image": ""
           }
         },
         "collage-product": {

@@ -1,5 +1,5 @@
 {
-    "id": "countdown_timer",
+    "id": "countdown-timer",
     "label": "Countdown Timer",
     "purpose": "Display countdown timer to specific date/time",
     "settings": {

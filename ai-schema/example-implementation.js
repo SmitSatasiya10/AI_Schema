@@ -84,6 +84,9 @@ Your job is to generate valid Shopify theme section configurations based on user
 CRITICAL RULES:
 1. You can ONLY use sections, blocks, and settings defined in the schemas below
 2. Do NOT invent new sections, blocks, or settings that don't exist
+   - Every section/block "type" you output MUST be copied VERBATIM from the "id" field of a schema in AVAILABLE SECTIONS/AVAILABLE BLOCKS below — exact spelling, exact hyphens vs underscores
+   - Do NOT guess a type from a block's label, purpose, or from wording used elsewhere in these rules — always copy the literal "id" value
+   - Example: the schema id is "icon-with-text" (hyphens) — using "icon_with_text" (underscore) is WRONG and will fail to upload to Shopify
 3. Return ONLY valid JSON - no explanations, no markdown
 4. If a requested section doesn't exist, omit it silently or suggest the closest match
 5. All setting values must match the allowed options in the schema
@@ -102,13 +105,17 @@ CRITICAL RULES:
    - Example: If max_blocks is 3, add MAXIMUM 3 blocks only
    - Exceeding max_blocks will cause upload failure
    - Check the section schema for max_blocks before adding blocks
-9. HOMEPAGE STRUCTURE (for index template):
+9. IMAGE FIELDS - CRITICAL:
+   - For any setting of type "image" or "image_picker", ALWAYS leave the value as an empty string ""
+   - NEVER invent a filename (e.g. "product-photo.jpg") or a fake URL — these are not real Shopify-hosted images and will fail to upload
+   - An empty string means "no image selected yet" — the merchant will pick a real image in Shopify admin afterward
+10. HOMEPAGE STRUCTURE (for index template):
    - MUST include EXACTLY 10 sections (this is mandatory)
    - FIRST section MUST ALWAYS be "slideshow" (hero section)
    - When a section has blocks, MUST include "block_order" array
    - block_order must list all blocks in the order they appear
    - Example: "block_order": ["slide-1", "slide-2"]
-10. VARIETY & CREATIVITY - EXTREMELY IMPORTANT:
+11. VARIETY & CREATIVITY - EXTREMELY IMPORTANT:
    - BE CREATIVE! Don't use the same sections every time (except first slideshow)
    - VARY section order based on the niche and user prompt (after the slideshow)
    - Mix different section types - use diverse sections from available list
@@ -125,21 +132,22 @@ CRITICAL RULES:
      * Services: Use results (achievements), testimonials, contact-form, custom-columns
    - Change alignment and layout settings between generations
    - If generating multiple times, MUST create different configurations each time
-11. PRODUCT PAGE STRUCTURE (for product template):
+12. PRODUCT PAGE STRUCTURE (for product template):
    - MUST use "main-product" section as the ONLY section
    - Product page is block-based - all content goes in blocks inside main-product section
    - MUST include 12-18 blocks in logical order for product pages
-   - Essential blocks (ALWAYS include): product_title, product_price, product_variant_picker, product_buy_buttons, product_description
-   - Trust blocks (highly recommended): review_avatars, rating_stars, payment_badges, product_shipping_checkpoints
-   - Conversion blocks (choose based on niche): product_urgency, product_inventory, product_clickable_discount, countdown_timer
-   - Additional blocks (choose 3-5): product_award_badge, product_sticky_atc, product_share, product_subscription, product_bundle_offer, product_custom_field, tab, accordion
-   - Typical block order: product_award_badge → review_avatars → product_title → product_price → rating_stars → product_description → product_variant_picker → product_quantity_selector → product_buy_buttons → product_shipping_checkpoints → payment_badges → product_estimated_shipping → tab/accordion → product_share
+   - Essential blocks (ALWAYS include): product_title, product_price, product_product-variant-picker-block, product_buy-buttons, product_description
+   - Trust blocks (highly recommended): review-avatars, rating-stars, payment-badges, product_shipping-checkpoints
+   - Conversion blocks (choose based on niche): product_urgency, product_inventory, product_clickable-discount, countdown-timer
+   - Additional blocks (choose 3-5): product_award-badge, product_sticky-atc, product_share-button, product_subscription, product_bundle-offer, product_custom-product-field, product_tabs, collapsible-row
+   - Typical block order: product_award-badge → review-avatars → product_title → product_price → rating-stars → product_description → product_product-variant-picker-block → product_quantity-selector → product_buy-buttons → product_shipping-checkpoints → payment-badges → product_estimated-shipping → product_tabs OR collapsible-row → product_share-button
    - Adapt blocks to niche:
-     * Fashion/Jewelry: product_size_chart, product_custom_field (engraving), review_avatars, product_urgency
-     * Electronics: rating_stars, tab (specs), product_bundle_offer, product_subscription
-     * Food/Organic: product_shipping_checkpoints, product_subscription, icon_with_text (benefits)
-     * Luxury: product_award_badge, review_avatars, product_estimated_shipping, payment_badges
+     * Fashion/Jewelry: product_sizing-chart, product_custom-product-field (engraving), review-avatars, product_urgency
+     * Electronics: rating-stars, product_tabs (specs), product_bundle-offer, product_subscription
+     * Food/Organic: product_shipping-checkpoints, product_subscription, icon-with-text (benefits)
+     * Luxury: product_award-badge, review-avatars, product_estimated-shipping, payment-badges
    - Each block must have unique, descriptive ID (e.g., "award-badge-1", "title", "price", "variant-picker", "buy-buttons-1")
+   - Do NOT use "tab" or "accordion" as a block type — they don't exist in this theme; use "product_tabs" or "collapsible-row" instead
 
 AVAILABLE GLOBAL SETTINGS:
 ${JSON.stringify(globalSchema, null, 2)}
@@ -291,7 +299,7 @@ function validateOutput(output, schemas) {
             }
 
             if (!sectionMap.has(section.type)) {
-                warnings.push(`Section "${sectionId}": unknown section type "${section.type}"`);
+                errors.push(`Section "${sectionId}": unknown section type "${section.type}" — this section type doesn't exist in any schema and will fail to upload to Shopify`);
                 continue;
             }
 
@@ -301,6 +309,18 @@ function validateOutput(output, schemas) {
             if (sectionSchema._notes) {
                 if (DEBUG) {
                     console.log(`📝 Section "${sectionId}" notes:`, sectionSchema._notes);
+                }
+            }
+
+            // Validate image_picker/image settings aren't hallucinated filenames
+            if (sectionSchema.settings && section.settings) {
+                for (const [settingKey, settingType] of Object.entries(sectionSchema.settings)) {
+                    if (settingType === 'image_picker' || settingType === 'image') {
+                        const value = section.settings[settingKey];
+                        if (value && typeof value === 'string' && !value.startsWith('shopify://') && !/^https?:\/\//.test(value)) {
+                            errors.push(`Section "${sectionId}" (type: "${section.type}"): setting "${settingKey}" has invalid image value "${value}" — image_picker settings must be left as an empty string ("") unless a real Shopify-hosted image URL is available. Do not invent filenames.`);
+                        }
+                    }
                 }
             }
 
@@ -354,7 +374,7 @@ function validateOutput(output, schemas) {
                         }
 
                         if (allowedBlocksList.length > 0 && !allowedBlocksList.includes(block.type)) {
-                            warnings.push(`Block "${blockId}" (type: "${block.type}") is not allowed in section "${sectionId}". Allowed blocks: ${allowedBlocksList.join(', ')}`);
+                            errors.push(`Block "${blockId}" (type: "${block.type}") is not allowed in section "${sectionId}" — this block type doesn't exist in the real theme's blocks folder for this section and will fail to upload to Shopify. Allowed blocks: ${allowedBlocksList.join(', ')}`);
                         }
 
                         // Check block-level notes
@@ -370,7 +390,20 @@ function validateOutput(output, schemas) {
                     }
 
                     if (!blockMap.has(block.type)) {
-                        warnings.push(`Block "${blockId}": unknown block type "${block.type}"`);
+                        errors.push(`Block "${blockId}": unknown block type "${block.type}" — this block type doesn't exist in any schema and will fail to upload to Shopify`);
+                    } else {
+                        // Validate image_picker/image settings aren't hallucinated filenames
+                        const blockSchema = blockMap.get(block.type);
+                        if (blockSchema.settings && block.settings) {
+                            for (const [settingKey, settingType] of Object.entries(blockSchema.settings)) {
+                                if (settingType === 'image_picker' || settingType === 'image') {
+                                    const value = block.settings[settingKey];
+                                    if (value && typeof value === 'string' && !value.startsWith('shopify://') && !/^https?:\/\//.test(value)) {
+                                        errors.push(`Block "${blockId}" (type: "${block.type}"): setting "${settingKey}" has invalid image value "${value}" — image_picker settings must be left as an empty string ("") unless a real Shopify-hosted image URL is available. Do not invent filenames.`);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
