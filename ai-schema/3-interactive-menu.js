@@ -191,6 +191,17 @@ function getProductPrompt(nicheChoice) {
 }
 
 /**
+ * Resolve the prompt to actually generate from when a niche/template was
+ * selected: the user's own typed input is the primary generation request
+ * whenever they provide one — the niche/template text is only a contextual
+ * default, used as-is when they press Enter without typing anything.
+ */
+function resolveNicheTemplatePrompt(templatePrompt, customInput) {
+    const trimmedCustom = (customInput || '').trim();
+    return trimmedCustom || templatePrompt;
+}
+
+/**
  * Main interactive flow
  */
 async function main() {
@@ -212,13 +223,18 @@ async function main() {
                             break;
                         }
                     } else {
-                        selectedHomepagePrompt = getNichePrompt(nicheChoice1);
-                        if (!selectedHomepagePrompt) {
+                        const nicheTemplatePrompt1 = getNichePrompt(nicheChoice1);
+                        if (!nicheTemplatePrompt1) {
                             console.log('❌ Invalid niche selection');
                             await prompt('Press Enter to continue...');
                             break;
                         }
-                        console.log(`\n📝 Homepage prompt: "${selectedHomepagePrompt}"\n`);
+                        console.log(`\n📝 Homepage prompt: "${nicheTemplatePrompt1}"\n`);
+                        const customHomepageInput1 = await prompt('📝 Add your own details, or press Enter to use this template as-is:\n> ');
+                        selectedHomepagePrompt = resolveNicheTemplatePrompt(nicheTemplatePrompt1, customHomepageInput1);
+                        if (selectedHomepagePrompt !== nicheTemplatePrompt1) {
+                            console.log(`\n📝 Using your prompt instead: "${selectedHomepagePrompt}"\n`);
+                        }
                     }
 
                     console.log('🚀 Generating homepage...\n');
@@ -391,4 +407,4 @@ if (require.main === module) {
     main().catch(console.error);
 }
 
-module.exports = { showMenu };
+module.exports = { showMenu, getNichePrompt, resolveNicheTemplatePrompt, rl };

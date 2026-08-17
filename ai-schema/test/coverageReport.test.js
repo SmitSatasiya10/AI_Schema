@@ -185,7 +185,7 @@ test('buildCoverageReport() — real repo: reflects Phase 11\'s actual coverage 
     assert.strictEqual(report.summary.aiSectionCount, 26);
     assert.strictEqual(report.summary.supportedSectionCount, 26, 'every AI section schema must correspond to a real Liquid file');
     assert.strictEqual(report.summary.realBlockCount, 80);
-    assert.strictEqual(report.summary.aiBlockCount, 58);
+    assert.strictEqual(report.summary.aiBlockCount, 57);
     // Denominator includes inline-only block types (declared inside a real
     // section's own schema, no standalone .liquid file — e.g. "hotspot"),
     // which is larger than the standalone-file count alone.
@@ -212,12 +212,11 @@ test('buildCoverageReport() — merging standalone + inline-declared real block 
     assert.deepStrictEqual(report.sections.staleAISchemas, [], 'no AI section schema should be orphaned');
 });
 
-test('buildCoverageReport() — the pre-existing "row" duplicate id is still detected (documented, not silently reintroduced or hidden)', () => {
-    assert.strictEqual(report.blocks.duplicateAIIds.length, 1);
-    assert.strictEqual(report.blocks.duplicateAIIds[0].id, 'row');
+test('buildCoverageReport() — the formerly-duplicate "row" id is gone (result_row.json merged into row.json and deleted) and no other duplicates exist', () => {
+    assert.deepStrictEqual(report.blocks.duplicateAIIds, []);
 });
 
-test('buildCoverageReport() — Phase 11 introduced no NEW duplicate ids beyond the pre-existing "row" one', () => {
+test('buildCoverageReport() — no duplicate section ids exist', () => {
     assert.deepStrictEqual(report.sections.duplicateAIIds, []);
 });
 
