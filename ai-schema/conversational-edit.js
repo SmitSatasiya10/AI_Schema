@@ -42,6 +42,7 @@ const {
     EDIT_VERBS,
     classifyRequest,
     buildAmbiguityQuestion,
+    hasChangeDetails,
     runOperationProposalStage,
     runTargetedEdit
 } = require('./edit-pipeline');
@@ -204,41 +205,11 @@ function splitBoundedClauses(message) {
     return eachHasVerb ? parts : [message];
 }
 
-// ---------------------------------------------------------------------------
-// §10/§11 — minimal clarification. A resolved target alone isn't enough to
-// propose an operation when the intent is purely "change the banner" — no
-// AI call is bounded/cheap enough to justify guessing WHAT changed when the
-// merchant never said. Deterministic, not NLP: strip generic edit verbs and
-// the target's own id/type tokens from the intent; if anything real is left
-// over, there's enough to propose from (Scenario 2's "Change the hero
-// heading to Healthy nutrition for every dog." skips this question
-// entirely); if nothing is left, ask exactly one question instead of
-// spending an AI call on a guess (Scenario 1).
-// ---------------------------------------------------------------------------
-
-const GENERIC_INTENT_WORDS = new Set([
-    'the', 'a', 'an', 'to', 'of', 'on', 'for', 'my', 'this', 'that', 'it',
-    'please', 'i', 'want', 'would', 'like', 'me', 'can', 'you', 'need',
-    // Structural/vague nouns naming WHAT KIND of thing is being touched
-    // (already established by the resolved target itself), not WHAT the
-    // new value should be — "change one section content" leaves only
-    // these after generic-word/verb stripping, which used to read as
-    // "real" intent and skip straight to an AI call with nothing to go
-    // on, so the AI invented content on its own instead of asking.
-    'one', 'some', 'section', 'block', 'content'
-]);
-
-function tokenize(text) {
-    return (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-}
-
-function hasChangeDetails(intentText, target) {
-    const targetTokens = new Set(tokenize([target.sectionId, target.blockId, target.type, target.blockType]
-        .filter(Boolean).join(' ').replace(/[-_]/g, ' ')));
-    const remaining = tokenize(intentText).filter(token =>
-        !GENERIC_INTENT_WORDS.has(token) && !targetTokens.has(token) && !EDIT_VERBS.includes(token));
-    return remaining.length > 0;
-}
+// §10/§11 — hasChangeDetails() (a resolved target alone isn't enough to
+// propose an operation when the intent says nothing about WHAT changed) now
+// lives in edit-pipeline.js, imported above — runTargetedEdit() itself
+// applies the same check on a FIRST-pass resolution now too, not just this
+// file's second-round clarification-answer path below.
 
 // ---------------------------------------------------------------------------
 // Target-context construction for an ALREADY-known target (skips
@@ -536,7 +507,18 @@ async function runConversationalEdit(message, options = {}) {
         }
         if (result.status === 'NEEDS_CLARIFICATION') {
             await persistUnmutatedThemeState();
-            const kind = result.candidates && result.candidates[0] && 'blockId' in result.candidates[0] ? 'block' : 'section';
+            if (!result.candidates || result.candidates.length === 0) {
+                // No fixed candidate list to match the answer against (e.g.
+                // edit-pipeline.js's AI-assisted target resolution asking its
+                // OWN open-ended question) — merge the answer into the
+                // original intent and let resolution run again next turn,
+                // same as a classification-level AMBIGUOUS turn already does,
+                // rather than routing to mergeClarificationAnswer() which
+                // requires real candidates to match against.
+                const pendingClarification = { kind: 'intent' };
+                return finish({ ...resultSession, pendingClarification, pendingQuestion: result.questions[0], themeStateVersion: currentVersion }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: result.questions });
+            }
+            const kind = result.candidates[0] && 'blockId' in result.candidates[0] ? 'block' : 'section';
             const pendingClarification = { kind, candidates: result.candidates, templateName: result.templateName || ctx.templateName, sectionId: result.sectionId || null, questions: result.questions };
             return finish({ ...resultSession, pendingClarification, pendingQuestion: result.questions[0], themeStateVersion: currentVersion }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: result.questions, candidates: result.candidates });
         }

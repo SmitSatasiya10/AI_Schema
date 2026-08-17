@@ -17,34 +17,26 @@
             "width_mobile": "2"
           }
         },
-        "links-shop": {
+        "footer-links-1": {
           "type": "link_list",
           "settings": {
-            "heading": "Our Produce",
+            "heading": "Quick Links",
             "menu": "main-menu"
           }
         },
-        "links-info": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Help & Info",
-            "menu": "footer"
-          }
-        },
-        "newsletter": {
+        "footer-newsletter-1": {
           "type": "email_signup",
           "settings": {
-            "heading": "Fresh Updates",
-            "subtext": "<p>Sign up for news on fresh arrivals, seasonal specials, and farm-to-table tips from Smit.</p>",
+            "heading": "Join Our Pack",
+            "subtext": "<p>Sign up for exclusive deals on pet supplies, new arrivals, and tail-wagging tips for your furry friends.</p>",
             "button_label": "Subscribe"
           }
         }
       },
       "block_order": [
         "fc645871-d789-4cfa-8584-4f8a29b6ce92",
-        "links-shop",
-        "links-info",
-        "newsletter"
+        "footer-links-1",
+        "footer-newsletter-1"
       ],
       "custom_css": [],
       "settings": {

@@ -59,6 +59,14 @@ const EDIT_VERBS = ['change', 'update', 'remove', 'delete', 'add', 'move', 'repl
 // guess an operation with zero grounding.
 const ADD_SIGNAL_VERBS = ['add', 'create', 'insert', 'new'];
 
+// A removal is a complete instruction the moment its target is identified —
+// "remove the testimonials section" has nothing left to ask about, unlike
+// an update/add which still needs to say what the new value/content is.
+// hasChangeDetails() would otherwise see nothing but generic words + the
+// target's own identity left after stripping and (wrongly) ask "what would
+// you like to change?" for a request that never needed an answer.
+const REMOVE_SIGNAL_VERBS = ['remove', 'delete'];
+
 function classifyRequest(userPrompt) {
     const lower = (userPrompt || '').toLowerCase();
     if (CREATE_SIGNAL_PHRASES.some(phrase => lower.includes(phrase))) {
@@ -79,6 +87,46 @@ function classifyRequest(userPrompt) {
 function buildAmbiguityQuestion(candidates, kind) {
     const options = candidates.map((c, i) => `${i + 1}. ${c.sectionId || c.blockId} (${c.type})`).join('\n');
     return `Which ${kind} did you mean?\n${options}`;
+}
+
+// ---------------------------------------------------------------------------
+// §10/§11 — minimal clarification. A resolved target alone isn't enough to
+// propose an operation when the intent is purely "change the banner" — no
+// AI call is bounded/cheap enough to justify guessing WHAT changed when the
+// merchant never said. Deterministic, not NLP: strip generic edit verbs and
+// the target's own id/type tokens from the intent; if anything real is left
+// over, there's enough to propose from ("Change the hero heading to Healthy
+// nutrition for every dog." skips this question entirely); if nothing is
+// left, ask exactly one question instead of spending an AI call on a guess.
+// Shared by runTargetedEdit() below (a target resolved on the FIRST pass —
+// including via the AI-assisted resolution above, or via a merged-intent
+// retry) and conversational-edit.js (a target resolved via a SECOND-round
+// clarification answer) — same rule, one definition, either path.
+// ---------------------------------------------------------------------------
+
+const GENERIC_INTENT_WORDS = new Set([
+    'the', 'a', 'an', 'to', 'of', 'on', 'for', 'my', 'this', 'that', 'it',
+    'please', 'i', 'want', 'would', 'like', 'me', 'can', 'you', 'need', 'is',
+    // Structural/vague nouns naming WHAT KIND of thing is being touched
+    // (already established by the resolved target itself), not WHAT the
+    // new value should be.
+    'one', 'some', 'section', 'block', 'content',
+    // WHERE, not WHAT — answers "which area of the theme", the same
+    // question target RESOLUTION already asks, not "what should it say/look
+    // like now" (what hasChangeDetails() actually needs to see).
+    'homepage', 'home', 'page', 'template', 'site', 'store', 'website'
+]);
+
+function intentTokenize(text) {
+    return (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function hasChangeDetails(intentText, target) {
+    const targetTokens = new Set(intentTokenize([target.sectionId, target.blockId, target.type, target.blockType]
+        .filter(Boolean).join(' ').replace(/[-_]/g, ' ')));
+    const remaining = intentTokenize(intentText).filter(token =>
+        !GENERIC_INTENT_WORDS.has(token) && !targetTokens.has(token) && !EDIT_VERBS.includes(token));
+    return remaining.length > 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,6 +168,115 @@ function buildProposalUserPrompt(userPrompt, repairErrors) {
         prompt += `\n\nYour previous response was invalid for these reasons: ${repairErrors.join('; ')}. Fix these issues and respond again with ONLY the corrected JSON object.`;
     }
     return prompt;
+}
+
+// ---------------------------------------------------------------------------
+// Target resolution — when NOTHING in the default template matches by
+// keyword overlap at all, that's exactly the case where a merchant's own
+// wording can't be trusted to deterministic scoring: a word like "footer"
+// might name the actual target ("change the footer text"), or might just be
+// a LANDMARK for locating something else entirely ("the section before the
+// footer"). Keyword overlap can't tell those apart — only understanding the
+// sentence can. So this is the one place a bounded AI call gets to make that
+// judgment call itself, across every template's sections at once, and is
+// EXPLICITLY allowed to say "I'm not sure" with its own clarifying question
+// instead of guessing — deterministic code still never trusts its answer
+// without checking the id it names actually exists (§8/§9's rule, applied
+// here too).
+// ---------------------------------------------------------------------------
+
+function buildSectionListingAcrossTemplates(themeState) {
+    const listing = [];
+    for (const [templateName, template] of Object.entries(themeState.templates || {})) {
+        for (const [sectionId, section] of Object.entries((template.raw && template.raw.sections) || {})) {
+            listing.push({ templateName, sectionId, type: section.type });
+        }
+    }
+    return listing;
+}
+
+function buildTargetResolutionSystemPrompt(sectionListing) {
+    return `You are helping locate WHICH EXISTING section of a Shopify theme a merchant's edit request refers to. The merchant's own words may be vague, or may name another area only as a LANDMARK for finding something else ("the section before the footer", "above the header") rather than naming that area as the actual target — use your judgment about what they actually mean, not just keyword overlap.
+
+Respond with EXACTLY ONE JSON object, in ONE of these two shapes:
+{"confident": true, "templateName": "<templateName>", "sectionId": "<sectionId>"}
+{"confident": false, "clarifyingQuestion": "<optional: one short question to ask the merchant, if you have a specific one in mind>"}
+
+CRITICAL RULES:
+1. templateName/sectionId, if given, MUST be copied VERBATIM from EXISTING SECTIONS below — never invent one.
+2. Only set confident:true if you are reasonably sure which ONE section is meant. If multiple sections could equally match, or nothing clearly matches, set confident:false instead of guessing.
+3. When confident:false, include "clarifyingQuestion" if you have a specific, useful question to ask — omit it if you don't; a generic fallback will be used instead.
+4. Return ONLY the JSON object — no explanation, no markdown.
+
+EXISTING SECTIONS (every section in every template/page of this theme):
+${JSON.stringify(sectionListing)}`;
+}
+
+function buildTargetResolutionUserPrompt(userPrompt, repairErrors) {
+    let prompt = `Merchant request: "${userPrompt}"\n\nProduce the JSON now.`;
+    if (repairErrors && repairErrors.length > 0) {
+        prompt += `\n\nYour previous response was invalid for these reasons: ${repairErrors.join('; ')}. Fix these issues and respond again with ONLY the corrected JSON object.`;
+    }
+    return prompt;
+}
+
+function validateTargetResolution(resolution, themeState) {
+    if (!resolution || typeof resolution !== 'object') {
+        return { valid: false, errors: [{ message: 'response is not a JSON object' }] };
+    }
+    if (typeof resolution.confident !== 'boolean') {
+        return { valid: false, errors: [{ message: '"confident" must be a boolean' }] };
+    }
+    if (resolution.confident === true) {
+        const { templateName, sectionId } = resolution;
+        if (typeof templateName !== 'string' || typeof sectionId !== 'string') {
+            return { valid: false, errors: [{ message: 'confident:true requires string "templateName" and "sectionId"' }] };
+        }
+        const template = themeState.templates[templateName];
+        const section = template && template.raw.sections[sectionId];
+        if (!section) {
+            return { valid: false, errors: [{ message: `"${templateName}"."${sectionId}" does not exist — templateName/sectionId must be copied verbatim from EXISTING SECTIONS` }] };
+        }
+        return { valid: true, errors: [] };
+    }
+    if (resolution.clarifyingQuestion !== undefined && (typeof resolution.clarifyingQuestion !== 'string' || !resolution.clarifyingQuestion.trim())) {
+        return { valid: false, errors: [{ message: 'if present, "clarifyingQuestion" must be a non-empty string' }] };
+    }
+    return { valid: true, errors: [] };
+}
+
+/**
+ * ONE bounded AI call, ONE bounded repair — same shape as
+ * runOperationProposalStage() below. Deterministic code (validateTargetResolution
+ * above) is what actually decides whether the AI's pick is trustworthy; this
+ * function never returns a target that doesn't verifiably exist.
+ */
+async function runTargetResolutionStage({ userPrompt, themeState, requestId }) {
+    const sectionListing = buildSectionListingAcrossTemplates(themeState);
+    const systemPrompt = buildTargetResolutionSystemPrompt(sectionListing);
+
+    function parseAndValidate(content) {
+        let resolution;
+        try {
+            resolution = JSON.parse(content);
+        } catch (error) {
+            return { resolution: null, validation: { valid: false, errors: [{ message: `not valid JSON: ${error.message}` }] } };
+        }
+        return { resolution, validation: validateTargetResolution(resolution, themeState) };
+    }
+
+    const firstContent = await makeAIRequest(buildTargetResolutionUserPrompt(userPrompt, null), systemPrompt, 2, { requestId, callType: 'target_resolution' });
+    let { resolution, validation } = parseAndValidate(firstContent);
+    let repaired = false;
+
+    if (!validation.valid) {
+        repaired = true;
+        const repairErrors = validation.errors.map(e => e.message);
+        const repairContent = await makeAIRequest(buildTargetResolutionUserPrompt(userPrompt, repairErrors), systemPrompt, 2, { requestId, callType: 'target_resolution_repair' });
+        ({ resolution, validation } = parseAndValidate(repairContent));
+    }
+
+    return { resolution, validation, repaired };
 }
 
 /**
@@ -176,13 +333,16 @@ async function runTargetedEdit(userPrompt, options = {}) {
     const {
         themeState,
         schemas,
-        templateName = 'index',
         knownMerchantData = {},
         autoApply = false,
         themeRoot,
         dryRunApply = false,
         requestId = instrumentation.nextRequestId('edit')
     } = options;
+    // Mutable: an AI-assisted resolution below (§10/§29) can switch this to
+    // a DIFFERENT template than the one the turn started in, when the
+    // merchant's own wording named no section in the default scope.
+    let templateName = options.templateName || 'index';
 
     if (!themeState) throw new Error('runTargetedEdit() requires a ThemeState');
     if (!schemas || !Array.isArray(schemas.sectionSchemas)) throw new Error('runTargetedEdit() requires the full AI schema catalog');
@@ -200,46 +360,72 @@ async function runTargetedEdit(userPrompt, options = {}) {
     // section id embedded in the prompt (unlikely from a human, common from
     // a programmatic caller) short-circuits via resolveSectionTarget()'s own
     // exact-match fast path.
-    const sectionTarget = resolveSectionTarget(themeState, templateName, userPrompt, schemas);
+    let sectionTarget = resolveSectionTarget(themeState, templateName, userPrompt, schemas);
 
-    if (sectionTarget.status === 'AMBIGUOUS') {
-        const result = {
-            status: 'NEEDS_CLARIFICATION',
-            classification,
-            targetStatus: sectionTarget.status,
-            templateName,
-            candidates: sectionTarget.candidates,
-            questions: [buildAmbiguityQuestion(sectionTarget.candidates, 'section')]
-        };
-        instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, durationMs: Date.now() - startTime });
-        return result;
-    }
-
-    // §10/§29 — NOT_FOUND means no existing section matched at all. When the
-    // template exists but nothing in it matched (a vague "change one
-    // section" that names no section), there's no target to propose an
-    // operation against, so ask which section instead of sending an
-    // ungrounded AI call that can only guess. This does NOT apply when the
-    // template itself isn't present in the ThemeState at all — that's the
-    // legitimate shape of a global-settings-only request (no section is
-    // ever the target for update_global_settings), which must still reach
-    // the AI proposal below.
+    // Keyword-overlap scoring can fail two different ways — a tie
+    // (AMBIGUOUS, e.g. a generic word like "content" happens to sit in
+    // several sections' category tags) or nothing at all (NOT_FOUND) — and
+    // either way, understanding what the merchant actually meant needs more
+    // than word overlap: "the section before the footer" and "the footer
+    // section" share every keyword but mean different things. So BOTH cases
+    // give a bounded AI call first say at resolving it (across every
+    // template, not just this one), and it's EXPLICITLY allowed to say "not
+    // confident" with its own clarifying question rather than guess —
+    // deterministic code still never trusts its pick without checking the
+    // id it names actually exists (validateTargetResolution). This does NOT
+    // apply when the template itself isn't present in the ThemeState at all
+    // — that's the legitimate shape of a global-settings-only request (no
+    // section is ever the target for update_global_settings), which must
+    // still reach the AI proposal below.
     const targetTemplate = themeState.templates[templateName];
-    if (sectionTarget.status === 'NOT_FOUND' && targetTemplate) {
-        const looksLikeAdd = ADD_SIGNAL_VERBS.some(verb => new RegExp(`\\b${verb}\\b`, 'i').test(userPrompt));
+    let resolutionAiCallCount = 0;
+    if ((sectionTarget.status === 'AMBIGUOUS' || sectionTarget.status === 'NOT_FOUND') && targetTemplate) {
+        const looksLikeAdd = sectionTarget.status === 'NOT_FOUND' && ADD_SIGNAL_VERBS.some(verb => new RegExp(`\\b${verb}\\b`, 'i').test(userPrompt));
         if (!looksLikeAdd) {
-            const availableSections = Object.entries(targetTemplate.raw.sections || {}).map(([sectionId, section]) => ({ sectionId, type: section.type }));
-            const result = {
-                status: 'NEEDS_CLARIFICATION',
-                classification,
-                targetStatus: sectionTarget.status,
-                templateName,
-                candidates: availableSections,
-                questions: [buildAmbiguityQuestion(availableSections, 'section')]
-            };
-            instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, durationMs: Date.now() - startTime });
-            return result;
+            const { resolution, validation: resolutionValidation, repaired: resolutionRepaired } = await runTargetResolutionStage({ userPrompt, themeState, requestId });
+            resolutionAiCallCount = resolutionRepaired ? 2 : 1;
+
+            if (resolutionValidation.valid && resolution.confident === true) {
+                // The AI identified an existing target — possibly in a
+                // DIFFERENT template than this turn started in — so switch
+                // scope to match and resolve it via the exact-id fast path
+                // (already verified to exist by validateTargetResolution).
+                templateName = resolution.templateName;
+                sectionTarget = resolveSectionTarget(themeState, templateName, resolution.sectionId, schemas);
+            } else {
+                // Not confident (or an invalid/hallucinated response even
+                // after one repair attempt) — ask the merchant instead of
+                // guessing. Prefer the AI's own open-ended question (merged
+                // into the intent and re-resolved next turn — no fixed list
+                // to match a free-text answer against); if even that's
+                // unusable, an AMBIGUOUS tie still has real (if imperfect)
+                // tied candidates to fall back to, which is a better last
+                // resort than a generic prompt with nothing behind it.
+                const useDeterministicFallback = !(resolutionValidation.valid && resolution.clarifyingQuestion) && sectionTarget.status === 'AMBIGUOUS';
+                const result = useDeterministicFallback
+                    ? {
+                        status: 'NEEDS_CLARIFICATION',
+                        classification,
+                        targetStatus: sectionTarget.status,
+                        templateName,
+                        candidates: sectionTarget.candidates,
+                        questions: [buildAmbiguityQuestion(sectionTarget.candidates, 'section')]
+                    }
+                    : {
+                        status: 'NEEDS_CLARIFICATION',
+                        classification,
+                        targetStatus: sectionTarget.status,
+                        templateName,
+                        candidates: [],
+                        questions: [(resolutionValidation.valid && resolution.clarifyingQuestion) ? resolution.clarifyingQuestion : 'Which section would you like to change?']
+                    };
+                instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, aiCallCount: resolutionAiCallCount, repaired: resolutionRepaired, durationMs: Date.now() - startTime });
+                return result;
+            }
         }
+        // else: add-shaped NOT_FOUND — no AI resolution call, proceed
+        // straight to the operation-proposal stage below with candidatePool,
+        // same as before this change.
     }
 
     let targetContext = null;
@@ -275,6 +461,35 @@ async function runTargetedEdit(userPrompt, options = {}) {
                 schemaSettings: blockSchema ? blockSchema.settings : {}
             };
         }
+
+        // §10/§11 — a target now exists, but the request may still say
+        // nothing about WHAT to change (e.g. the merchant's original words
+        // were purely "change one section content", and the AI-assisted
+        // resolution above only figured out WHICH section that meant — it
+        // never supplied a value either). Ask rather than let the
+        // operation-proposal call below guess a value nobody asked for. The
+        // answer merges into currentIntent and comes back through here
+        // again (conversational-edit.js's 'intent'-kind clarification), so
+        // this naturally keeps asking follow-ups until there's something
+        // concrete to act on.
+        const looksLikeRemove = REMOVE_SIGNAL_VERBS.some(verb => new RegExp(`\\b${verb}\\b`, 'i').test(userPrompt));
+        if (!looksLikeRemove && !hasChangeDetails(userPrompt, {
+            sectionId: targetContext.sectionId,
+            type: targetContext.type,
+            blockId: targetContext.block ? targetContext.block.blockId : undefined,
+            blockType: targetContext.block ? targetContext.block.type : undefined
+        })) {
+            const result = {
+                status: 'NEEDS_CLARIFICATION',
+                classification,
+                targetStatus: sectionTarget.status,
+                templateName,
+                candidates: [],
+                questions: ['What would you like to change?']
+            };
+            instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, aiCallCount: resolutionAiCallCount, durationMs: Date.now() - startTime });
+            return result;
+        }
     }
 
     // §12 — bounded candidate pool for add-shaped requests, reusing Phase 2
@@ -291,14 +506,14 @@ async function runTargetedEdit(userPrompt, options = {}) {
 
     if (!validation.valid) {
         const result = { status: 'FAILED', classification, targetStatus: sectionTarget.status, errors: validation.errors, operation, repaired };
-        instrumentation.logEditPipeline({ requestId, status: 'FAILED', classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: repaired ? 2 : 1, durationMs: Date.now() - startTime });
+        instrumentation.logEditPipeline({ requestId, status: 'FAILED', classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: resolutionAiCallCount + (repaired ? 2 : 1), durationMs: Date.now() - startTime });
         return result;
     }
 
     const executed = applyOperationToThemeState(themeState, operation, { themeState, schemas, knownMerchantData, requestId });
     if (!executed.valid) {
         const result = { status: 'FAILED', classification, targetStatus: sectionTarget.status, errors: executed.errors, operation, repaired };
-        instrumentation.logEditPipeline({ requestId, status: 'FAILED', classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: repaired ? 2 : 1, durationMs: Date.now() - startTime });
+        instrumentation.logEditPipeline({ requestId, status: 'FAILED', classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: resolutionAiCallCount + (repaired ? 2 : 1), durationMs: Date.now() - startTime });
         return result;
     }
 
@@ -324,17 +539,25 @@ async function runTargetedEdit(userPrompt, options = {}) {
         applyResult,
         repaired
     };
-    instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: repaired ? 2 : 1, durationMs: Date.now() - startTime });
+    instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, operationCount: 1, repaired, aiCallCount: resolutionAiCallCount + (repaired ? 2 : 1), durationMs: Date.now() - startTime });
     return result;
 }
 
 module.exports = {
     CREATE_SIGNAL_PHRASES,
     EDIT_VERBS,
+    ADD_SIGNAL_VERBS,
     classifyRequest,
     buildAmbiguityQuestion,
+    GENERIC_INTENT_WORDS,
+    hasChangeDetails,
     buildProposalSystemPrompt,
     buildProposalUserPrompt,
     runOperationProposalStage,
+    buildSectionListingAcrossTemplates,
+    buildTargetResolutionSystemPrompt,
+    buildTargetResolutionUserPrompt,
+    validateTargetResolution,
+    runTargetResolutionStage,
     runTargetedEdit
 };

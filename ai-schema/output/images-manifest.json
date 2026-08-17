@@ -1,9 +1,0 @@
-{
-  "hero-section": {
-    "type": "slideshow",
-    "path": "/Users/debutify/Documents/GitHub/EcomSkale/ai-schema/output/images/hero-section-slideshow.jpg",
-    "url": "images/hero-section-slideshow.jpg",
-    "generated": true,
-    "model": "google/gemini-2.5-flash-image-preview"
-  }
-}
