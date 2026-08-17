@@ -66,7 +66,7 @@ const DEFAULT_MIN_SECTIONS_FLOOR = 1;
 // logging, just not for selection) rather than running the general
 // floor/fallback logic — this is exactly "preserve the existing hardcoded
 // default behavior where appropriate" (Phase 2 spec §11).
-const FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE = { product: 'main-product' };
+const FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE = { product: 'main-product', 'footer-group': 'footer' };
 
 function normalize(text) {
     return (text || '').toLowerCase();
@@ -314,8 +314,133 @@ function retrieveRelevantSchemas(fullSchemas, options = {}) {
     };
 }
 
+/**
+ * getTemplateEligibleSchemas — used by Phase 5 staged generation's Planning
+ * stage (generation.js). Unlike retrieveRelevantSchemas() above, this does
+ * NO keyword matching and applies NO relevance judgment of its own — it
+ * only enforces the two hard, non-negotiable constraints (allowed_on
+ * template eligibility, and the forced-exclusive-section rule) and hands
+ * back everything else that's eligible. The actual choice of which of
+ * those eligible sections/blocks to use is left entirely to the AI in the
+ * Planning stage, which sees every eligible name (not a pre-filtered
+ * keyword-matched subset) — this is what lets staged generation generalize
+ * to niches/requests no one anticipated when retrieval-rules.json was
+ * written, instead of being bottlenecked by it.
+ *
+ * fullSchemas: { globalSchema, sectionSchemas, blockSchemas } — the
+ * complete, unfiltered set just read off disk.
+ */
+function getTemplateEligibleSchemas(fullSchemas, templateName = 'index', requestId = instrumentation.nextRequestId('eligibility')) {
+    const templateEligibleSections = fullSchemas.sectionSchemas.filter(s => isEligibleForTemplate(s, templateName));
+
+    const fullCharCount = schemaCharCount(fullSchemas.sectionSchemas, fullSchemas.blockSchemas);
+
+    // Same gap documented in retrieveRelevantSchemas()'s FULL_FALLBACK path:
+    // some templates (collection/blog/article/cart/search today) have no
+    // schemas declaring them in allowed_on at all. Falling back to the full
+    // catalog here preserves generation for those templates rather than
+    // handing the Planning stage an empty candidate pool it can't plan
+    // anything from.
+    if (templateEligibleSections.length === 0) {
+        instrumentation.logRetrieval({
+            requestId,
+            mode: 'ELIGIBILITY_FALLBACK_FULL',
+            templateName,
+            fallbackReason: `no sections declare "${templateName}" in allowed_on — nothing is eligible for this template today`,
+            candidateSectionCount: 0,
+            selectedSectionCount: fullSchemas.sectionSchemas.length,
+            candidateBlockCount: fullSchemas.blockSchemas.length,
+            selectedBlockCount: fullSchemas.blockSchemas.length,
+            fullSchemaChars: fullCharCount,
+            retrievedSchemaChars: fullCharCount,
+            estimatedFullTokens: instrumentation.estimateTokensFromChars(fullCharCount),
+            estimatedRetrievedTokens: instrumentation.estimateTokensFromChars(fullCharCount)
+        });
+
+        return {
+            globalSchema: fullSchemas.globalSchema,
+            sectionSchemas: fullSchemas.sectionSchemas,
+            blockSchemas: fullSchemas.blockSchemas,
+            retrievalMeta: {
+                mode: 'ELIGIBILITY_FALLBACK_FULL',
+                templateName,
+                fallbackReason: `no sections declare "${templateName}" in allowed_on — nothing is eligible for this template today`,
+                forcedExclusiveApplied: false,
+                candidateSectionCount: 0,
+                selectedSectionCount: fullSchemas.sectionSchemas.length,
+                candidateBlockCount: fullSchemas.blockSchemas.length,
+                selectedBlockCount: fullSchemas.blockSchemas.length
+            }
+        };
+    }
+
+    const forcedSectionId = FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE[templateName];
+    const forcedEntry = forcedSectionId
+        ? templateEligibleSections.find(s => s.id === forcedSectionId)
+        : null;
+
+    const selectedSections = forcedEntry ? [forcedEntry] : templateEligibleSections;
+
+    const blockById = new Map();
+    fullSchemas.blockSchemas.forEach(b => blockById.set(b.id, b));
+
+    const neededBlockIds = new Set();
+    const unresolvedBlockIds = new Set();
+    for (const section of selectedSections) {
+        const allowed = Array.isArray(section.allowed_blocks)
+            ? section.allowed_blocks
+            : (section.allowed_blocks && typeof section.allowed_blocks === 'object'
+                ? Object.keys(section.allowed_blocks)
+                : []);
+        for (const blockId of allowed) {
+            if (blockById.has(blockId)) {
+                neededBlockIds.add(blockId);
+            } else {
+                unresolvedBlockIds.add(blockId);
+            }
+        }
+    }
+    const selectedBlocks = [...neededBlockIds].map(id => blockById.get(id));
+
+    const retrievedCharCount = schemaCharCount(selectedSections, selectedBlocks);
+    const mode = forcedEntry ? 'ELIGIBILITY_FORCED_EXCLUSIVE' : 'ELIGIBILITY_ONLY';
+
+    instrumentation.logRetrieval({
+        requestId,
+        mode,
+        templateName,
+        fallbackReason: null,
+        candidateSectionCount: templateEligibleSections.length,
+        selectedSectionCount: selectedSections.length,
+        candidateBlockCount: fullSchemas.blockSchemas.length,
+        selectedBlockCount: selectedBlocks.length,
+        fullSchemaChars: fullCharCount,
+        retrievedSchemaChars: retrievedCharCount,
+        estimatedFullTokens: instrumentation.estimateTokensFromChars(fullCharCount),
+        estimatedRetrievedTokens: instrumentation.estimateTokensFromChars(retrievedCharCount)
+    });
+
+    return {
+        globalSchema: fullSchemas.globalSchema,
+        sectionSchemas: selectedSections,
+        blockSchemas: selectedBlocks,
+        retrievalMeta: {
+            mode,
+            templateName,
+            fallbackReason: null,
+            forcedExclusiveApplied: !!forcedEntry,
+            candidateSectionCount: templateEligibleSections.length,
+            selectedSectionCount: selectedSections.length,
+            candidateBlockCount: fullSchemas.blockSchemas.length,
+            selectedBlockCount: selectedBlocks.length,
+            unresolvedBlockIds: [...unresolvedBlockIds]
+        }
+    };
+}
+
 module.exports = {
     retrieveRelevantSchemas,
+    getTemplateEligibleSchemas,
     matchRules,
     MIN_SECTIONS_FLOOR,
     DEFAULT_MIN_SECTIONS_FLOOR,

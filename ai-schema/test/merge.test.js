@@ -245,8 +245,12 @@ test('mergeThemeState() — forced-exclusive template: splices into an EXISTING 
     assert.deepStrictEqual(mergedRaw.sections['colors_changer_7arBdR'], { type: 'colors-changer', settings: { foo: 'bar' } });
     assert.deepStrictEqual(mergedRaw.sections['results_aVyfVq'], { type: 'results', settings: {} });
     assert.deepStrictEqual(mergedRaw.order, ['colors_changer_7arBdR', 'main', 'results_aVyfVq']);
-    // Targeted section: candidate owns type/settings/blocks/block_order...
-    assert.deepStrictEqual(mergedRaw.sections.main.settings, {});
+    // Targeted section: candidate owns type/blocks/block_order outright...
+    // settings is a SPREAD, not a replace — the candidate contributes no
+    // keys here, so the pre-existing "old: true" setting must survive (a
+    // full replace would silently wipe merchant-set settings the candidate
+    // doesn't know about — see merge.js's mergeForcedExclusiveTemplate()).
+    assert.deepStrictEqual(mergedRaw.sections.main.settings, { old: true });
     assert.deepStrictEqual(mergedRaw.sections.main.blocks, { t1: { type: 'product_title', settings: {} } });
     // ...but an unknown property on that same section survives (§13).
     assert.strictEqual(mergedRaw.sections.main.theme_specific_property, 'keep-me');

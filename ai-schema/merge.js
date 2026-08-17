@@ -137,7 +137,13 @@ function mergeForcedExclusiveTemplate(existingRaw, candidate, forcedSectionId) {
     dest.sections[targetKey] = {
         ...(dest.sections[targetKey] || {}),
         type: candidateSection.type,
-        settings: candidateSection.settings,
+        // Spread (not replace): a candidate whose schema declares no
+        // section-level settings at all (e.g. "footer" — merchant styling
+        // is deliberately out of AI scope, see footer.json) must not wipe
+        // every existing setting down to {}. Keys the candidate DOES
+        // provide (e.g. "product"/main-product's AI-controlled settings)
+        // still override, same as before.
+        settings: { ...((dest.sections[targetKey] || {}).settings || {}), ...candidateSection.settings },
         blocks: candidateSection.blocks,
         block_order: candidateSection.block_order
     };

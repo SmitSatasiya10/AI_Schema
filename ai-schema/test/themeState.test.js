@@ -24,6 +24,7 @@ const {
     loadThemeState,
     themeStateFilePath,
     listTemplateFiles,
+    listSectionGroupFiles,
     classifyTemplate,
     DEFAULT_THEME_ROOT
 } = themeState;
@@ -38,9 +39,10 @@ test.before(async () => {
     realState = await buildThemeState();
 });
 
-test('buildThemeState() — against the real theme, detects every *.json template on disk', async () => {
+test('buildThemeState() — against the real theme, detects every *.json template on disk plus section-group files', async () => {
     const { found, skipped } = await listTemplateFiles(DEFAULT_THEME_ROOT);
-    assert.strictEqual(realState.meta.templateCount, found.length);
+    const { found: groupFound } = await listSectionGroupFiles(DEFAULT_THEME_ROOT);
+    assert.strictEqual(realState.meta.templateCount, found.length + groupFound.length);
     assert.ok(found.some(f => f.name === 'index'));
     assert.ok(found.some(f => f.name === 'product'));
     assert.ok(found.some(f => f.name === 'customers/account'), 'expected a nested customers/ template to be detected');
@@ -48,6 +50,15 @@ test('buildThemeState() — against the real theme, detects every *.json templat
     // unsupported (§10), not silently treated as if it were a JSON template.
     assert.ok(skipped.some(s => s.endsWith('gift_card.liquid')));
     assert.deepStrictEqual(realState.meta.unsupportedTemplateFiles, skipped);
+
+    // footer coverage (see footer.json) depends on footer-group.json being
+    // discovered and given the right sourceFile — the one thing merge.js/
+    // apply.js actually rely on to write it correctly.
+    assert.ok(groupFound.some(f => f.name === 'footer-group'));
+    assert.ok(realState.templates['footer-group'], 'expected footer-group to be represented in ThemeState');
+    assert.strictEqual(realState.templates['footer-group'].sourceFile, 'sections/footer-group.json');
+    // Locale-variant override files must NOT be treated as their own group.
+    assert.ok(!groupFound.some(f => f.name.includes('.context.')));
 });
 
 test('buildThemeState() — real theme: known types come from the AI schema catalog, unknown types are still counted (not dropped)', () => {

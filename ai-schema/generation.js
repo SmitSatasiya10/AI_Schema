@@ -8,13 +8,18 @@
  *   WebsiteBrief (Phase 3) + ThemeState context (Phase 4, bounded)
  *        │
  *        ▼
- *   Deterministic retrieval (Phase 2, reused unchanged — no LLM call to
- *   pick schemas)
+ *   Template-eligibility filter (retrieval.js's getTemplateEligibleSchemas —
+ *   hard constraints only: allowed_on + forced-exclusive-section rules, no
+ *   keyword-based relevance guessing, no LLM call). Falls back to the full
+ *   catalog only when zero sections declare the template eligible at all.
  *        │
  *        ▼
- *   Stage 1 — PLANNING: decide which existing section/block types to use,
- *   in what order and composition. No settings, no content. Validated
- *   against the retrieved candidate set (never the whole catalog) before
+ *   Stage 1 — PLANNING: the AI itself decides which existing section/block
+ *   types to use, in what order and composition, from the FULL
+ *   template-eligible name list (not a keyword-narrowed subset) — this is
+ *   what lets it generalize to niches/requests retrieval-rules.json never
+ *   anticipated. No settings, no content yet. Validated against the
+ *   eligible candidate set (never an arbitrary invented type) before
  *   Stage 2 is allowed to run at all.
  *        │
  *        ▼
@@ -34,7 +39,7 @@
 
 const instrumentation = require('./instrumentation');
 const { buildCapabilityIndex } = require('./capability-index');
-const { retrieveRelevantSchemas, FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE, isEligibleForTemplate } = require('./retrieval');
+const { getTemplateEligibleSchemas, FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE, isEligibleForTemplate } = require('./retrieval');
 const { makeAIRequest, validateOutput } = require('./example-implementation');
 const { briefToSummaryText } = require('./brief');
 const { selectGenerationContext } = require('./theme-state');
@@ -447,9 +452,10 @@ async function runStagedGeneration(options = {}) {
 
     const startTime = Date.now();
 
-    // §24 — retrieval driven by the structured brief, not raw prompt wording.
-    const retrievalText = briefToSummaryText(brief);
-    const retrieved = retrieveRelevantSchemas(schemas, { userPrompt: retrievalText, templateName, requestId });
+    // Hard-constraint-only eligibility filter — the AI itself chooses which
+    // of the eligible sections/blocks to use in Stage 1, not a keyword
+    // matcher (see file header).
+    const retrieved = getTemplateEligibleSchemas(schemas, templateName, requestId);
 
     // §7/§25 — bounded, deterministic ThemeState slice; never the whole state.
     const themeContext = themeState

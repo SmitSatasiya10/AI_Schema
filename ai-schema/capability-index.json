@@ -1,7 +1,7 @@
 {
-  "builtAt": "2026-08-17T08:36:57.331Z",
-  "sectionCount": 26,
-  "blockCount": 57,
+  "builtAt": "2026-08-17T09:26:21.057Z",
+  "sectionCount": 27,
+  "blockCount": 59,
   "sections": [
     {
       "id": "collage",
@@ -193,6 +193,21 @@
       ],
       "hasBlocks": false,
       "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "footer",
+      "label": "Footer",
+      "category": "layout-structural",
+      "tags": [
+        "footer"
+      ],
+      "summary": "Site-wide footer with navigation links and a newsletter signup",
+      "allowed_on": [
+        "footer-group"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 2,
       "maxBlocks": null
     },
     {
@@ -647,6 +662,20 @@
       ]
     },
     {
+      "id": "email_signup",
+      "label": "Footer Email Signup",
+      "category": "form-input",
+      "tags": [
+        "footer",
+        "newsletter"
+      ],
+      "summary": "Newsletter signup prompt in the footer",
+      "scope": "local",
+      "usedBySectionIds": [
+        "footer"
+      ]
+    },
+    {
       "id": "heading",
       "label": "Heading",
       "category": "content",
@@ -718,6 +747,19 @@
       "scope": "local",
       "usedBySectionIds": [
         "image-slider"
+      ]
+    },
+    {
+      "id": "link_list",
+      "label": "Link List",
+      "category": "layout-structural",
+      "tags": [
+        "footer"
+      ],
+      "summary": "A titled group of navigation links in the footer",
+      "scope": "local",
+      "usedBySectionIds": [
+        "footer"
       ]
     },
     {

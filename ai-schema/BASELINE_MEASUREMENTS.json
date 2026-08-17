@@ -1,10 +1,10 @@
 {
-  "measuredAt": "2026-08-17T08:36:57.227Z",
-  "sectionSchemaCount": 26,
-  "blockSchemaCount": 57,
+  "measuredAt": "2026-08-17T09:26:20.810Z",
+  "sectionSchemaCount": 27,
+  "blockSchemaCount": 59,
   "globalSettingsKeyCount": 9,
-  "systemPromptChars": 82250,
-  "estimatedSystemPromptTokens": 20563,
+  "systemPromptChars": 84245,
+  "estimatedSystemPromptTokens": 21062,
   "openRouterCallsPerGeneration": 2,
   "model": "moonshotai/kimi-k2.5"
 }

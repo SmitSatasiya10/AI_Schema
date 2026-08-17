@@ -2,6 +2,8 @@
 
 Scope executed: **Phase 5 only**, per `AI_THEME_BUILDER_PHASE_PLAN.md` §9 (Implementation Governance) and the detailed Phase 5 spec (`AI_THEME_BUILDER_PHASE5_PLAN.md`). No later phase (merge-based apply, structured operations, targeted editing, redesign, undo/redo, PostgreSQL, Next.js/DaisyUI/Base UI, preview) was started. The legacy single-mega-prompt path remains the default and is unchanged in behavior.
 
+**Update (2026-08-17):** staged generation is now the default at the CLI (`1-generate-theme.js` `parseArgs()`) and interactive-menu (`3-interactive-menu.js`) entry points — see `PHASE2_REPORT.md`'s "Known limitations" update. `runFullPipeline()`'s own internal default is unchanged (still `false` unless `stagedMode: true` is passed), so direct/programmatic callers and this report's own regression tests are unaffected. Stage 1's candidate schemas now come from `retrieval.js`'s new `getTemplateEligibleSchemas()` (hard `allowed_on`/forced-exclusive-section constraints only) instead of the keyword-matching `retrieveRelevantSchemas()` this report originally described — the AI sees every template-eligible section/block name and chooses itself, rather than being pre-filtered by keyword rules.
+
 ---
 
 ## Objective

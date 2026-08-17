@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const { loadSchemas } = require('../example-implementation');
-const { retrieveRelevantSchemas, matchRules } = require('../retrieval');
+const { retrieveRelevantSchemas, matchRules, getTemplateEligibleSchemas } = require('../retrieval');
 
 let fullSchemas;
 
@@ -204,4 +204,44 @@ test('loadSchemas() — full-load mode is completely unaffected by Phase 2 (stil
     const full = await loadSchemas();
     assert.strictEqual(full.sectionSchemas.length, fullSchemas.sectionSchemas.length);
     assert.strictEqual(full.blockSchemas.length, fullSchemas.blockSchemas.length);
+});
+
+// ---------------------------------------------------------------------
+// getTemplateEligibleSchemas() — hard-constraint-only filter used by staged
+// generation's Planning stage (generation.js). No keyword matching: the AI
+// itself chooses among everything returned here.
+// ---------------------------------------------------------------------
+
+test('getTemplateEligibleSchemas() — index template returns every allowed_on-eligible section, no keyword narrowing', () => {
+    const result = getTemplateEligibleSchemas(fullSchemas, 'index');
+    assert.strictEqual(result.retrievalMeta.mode, 'ELIGIBILITY_ONLY');
+    assert.strictEqual(result.retrievalMeta.forcedExclusiveApplied, false);
+    const eligibleInFull = fullSchemas.sectionSchemas.filter(s => !Array.isArray(s.allowed_on) || s.allowed_on.length === 0 || s.allowed_on.includes('index'));
+    assert.strictEqual(result.sectionSchemas.length, eligibleInFull.length);
+    assert.ok(!result.sectionSchemas.some(s => s.id === 'main-product'), 'main-product is only allowed_on ["product"]');
+});
+
+test('getTemplateEligibleSchemas() — product template forces exactly main-product (same rule as retrieveRelevantSchemas())', () => {
+    const result = getTemplateEligibleSchemas(fullSchemas, 'product');
+    assert.strictEqual(result.retrievalMeta.mode, 'ELIGIBILITY_FORCED_EXCLUSIVE');
+    assert.strictEqual(result.retrievalMeta.forcedExclusiveApplied, true);
+    assert.deepStrictEqual(result.sectionSchemas.map(s => s.id), ['main-product']);
+});
+
+test('getTemplateEligibleSchemas() — footer-group template forces exactly footer, with link_list/email_signup reachable', () => {
+    const result = getTemplateEligibleSchemas(fullSchemas, 'footer-group');
+    assert.strictEqual(result.retrievalMeta.mode, 'ELIGIBILITY_FORCED_EXCLUSIVE');
+    assert.strictEqual(result.retrievalMeta.forcedExclusiveApplied, true);
+    assert.deepStrictEqual(result.sectionSchemas.map(s => s.id), ['footer']);
+    const blockIds = result.blockSchemas.map(b => b.id);
+    assert.ok(blockIds.includes('link_list'));
+    assert.ok(blockIds.includes('email_signup'));
+});
+
+test('getTemplateEligibleSchemas() — an unsupported template (no schema declares it) falls back to the full catalog', () => {
+    const result = getTemplateEligibleSchemas(fullSchemas, 'collection');
+    assert.strictEqual(result.retrievalMeta.mode, 'ELIGIBILITY_FALLBACK_FULL');
+    assert.strictEqual(result.retrievalMeta.forcedExclusiveApplied, false);
+    assert.strictEqual(result.sectionSchemas.length, fullSchemas.sectionSchemas.length);
+    assert.strictEqual(result.blockSchemas.length, fullSchemas.blockSchemas.length);
 });
