@@ -268,11 +268,18 @@ test('conversational editing — an ambiguous newly-covered target still trigger
         'faq-1': { type: 'collapsible-content', settings: {}, blocks: {}, block_order: [] },
         'faq-2': { type: 'collapsible-content', settings: {}, blocks: {}, block_order: [] }
     }, ['faq-1', 'faq-2']);
+    // The AI's own bounded resolution attempt declines to pick between the
+    // tied candidates -> deterministic code falls back to them, same as
+    // before, just after one bounded AI call instead of zero.
+    const router = jsonFetch(() => ({ confident: false }));
+    const originalFetch = global.fetch;
+    global.fetch = router;
     try {
         const result = await runConversationalEdit('Change the collapsible content section.', { sessionId, schemas, themeState: ts, templateName: 'page' });
         assert.strictEqual(result.status, 'NEEDS_CLARIFICATION');
         assert.strictEqual(result.candidates.length, 2);
     } finally {
+        global.fetch = originalFetch;
         await cleanupSession(sessionId);
     }
 });

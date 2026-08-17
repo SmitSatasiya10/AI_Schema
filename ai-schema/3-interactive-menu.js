@@ -22,6 +22,112 @@ function prompt(question) {
     });
 }
 
+// ---------------------------------------------------------------------------
+// Color approval — the AI's suggested palette is shown and MUST be
+// confirmed (or overridden) before any generation step actually uses it.
+// Free-text, not a rigid form: "yes"/Enter accepts as-is; otherwise the
+// answer is parsed for hex colors, either bare ("#123456 #abcdef" ->
+// primary then secondary) or labeled ("primary=#123456 secondary=#abcdef").
+// Unparseable input is treated as a rejection, not a guess — it re-asks
+// rather than silently keeping or discarding the AI's suggestion.
+// ---------------------------------------------------------------------------
+
+const COLOR_KEY_ALIASES = {
+    primary: 'colors_accent_1',
+    accent: 'colors_accent_1',
+    accent1: 'colors_accent_1',
+    colorsaccent1: 'colors_accent_1',
+    secondary: 'colors_accent_2',
+    accent2: 'colors_accent_2',
+    colorsaccent2: 'colors_accent_2',
+    text: 'colors_text',
+    colorstext: 'colors_text',
+    background: 'colors_background_1',
+    bg: 'colors_background_1',
+    background1: 'colors_background_1',
+    colorsbackground1: 'colors_background_1',
+    background2: 'colors_background_2',
+    colorsbackground2: 'colors_background_2',
+    button: 'colors_solid_button_labels',
+    buttonlabel: 'colors_solid_button_labels',
+    colorssolidbuttonlabels: 'colors_solid_button_labels'
+};
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
+
+function normalizeHex(hex) {
+    if (hex.length === 4) {
+        const [, r, g, b] = hex;
+        return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+    }
+    return hex.toUpperCase();
+}
+
+function normalizeKey(rawKey) {
+    return rawKey.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Parses a free-text color-override answer into a partial colors object.
+ * Returns {} when nothing usable was found (caller treats that as "didn't
+ * understand it", not as "no changes wanted" — those are different things;
+ * "no changes wanted" is an empty/"yes" answer, handled by the caller
+ * before this is ever called).
+ */
+function parseColorOverrides(answer) {
+    const overrides = {};
+    const tokens = answer.split(/[\s,]+/).filter(Boolean);
+    let anyKeyed = false;
+    for (const token of tokens) {
+        if (!token.includes('=')) continue;
+        const [rawKey, rawValue] = token.split('=');
+        const key = COLOR_KEY_ALIASES[normalizeKey(rawKey || '')];
+        if (key && HEX_COLOR_PATTERN.test((rawValue || '').trim())) {
+            overrides[key] = normalizeHex(rawValue.trim());
+            anyKeyed = true;
+        }
+    }
+    if (!anyKeyed) {
+        const hexes = tokens.filter(t => HEX_COLOR_PATTERN.test(t)).map(normalizeHex);
+        if (hexes[0]) overrides.colors_accent_1 = hexes[0];
+        if (hexes[1]) overrides.colors_accent_2 = hexes[1];
+    }
+    return overrides;
+}
+
+/**
+ * Shows the AI-suggested palette and asks the merchant to approve or
+ * override it before it's used anywhere — generation never proceeds on an
+ * AI color choice the merchant hasn't actually seen and accepted.
+ */
+async function confirmOrOverrideColors(colors) {
+    console.log('🎨 Suggested color palette:');
+    console.log(`   Primary:   ${colors.colors_accent_1}`);
+    console.log(`   Secondary: ${colors.colors_accent_2}`);
+    if (colors.description) console.log(`   Why: ${colors.description}`);
+
+    while (true) {
+        const answer = (await prompt('\nUse these colors? Press Enter to accept, or type your own (e.g. "primary=#123456 secondary=#abcdef", or just "#123456 #abcdef"):\n> ')).trim();
+        if (!answer || /^y(es)?$/i.test(answer)) {
+            return colors;
+        }
+
+        const overrides = parseColorOverrides(answer);
+        if (Object.keys(overrides).length === 0) {
+            console.log('⚠️  Could not find any valid hex colors in that — try again, or press Enter to accept the suggested palette.');
+            continue;
+        }
+
+        const updated = { ...colors, ...overrides };
+        if (overrides.colors_accent_1 || overrides.colors_accent_2) {
+            updated.gradient_accent_1 = `linear-gradient(135deg, ${updated.colors_accent_1} 0%, ${updated.colors_accent_2} 100%)`;
+        }
+        console.log('\n✅ Using your colors:');
+        console.log(`   Primary:   ${updated.colors_accent_1}`);
+        console.log(`   Secondary: ${updated.colors_accent_2}`);
+        return updated;
+    }
+}
+
 /**
  * Show menu and get user choice
  */
@@ -214,57 +320,13 @@ async function runStagedPipeline(initialPrompt, pipelineOptions) {
     let userInput = initialPrompt;
     let sessionId = null;
     while (true) {
-        const result = await runFullPipeline(userInput, { ...pipelineOptions, stagedMode: true, sessionId });
+        const result = await runFullPipeline(userInput, { ...pipelineOptions, stagedMode: true, sessionId, onColorsReady: confirmOrOverrideColors });
         if (result.status !== 'NEEDS_CLARIFICATION') return result;
         console.log('\n❓ A few quick questions before we generate your store:\n');
         result.questions.forEach((q, i) => console.log(`   ${i + 1}. ${q}`));
         userInput = await prompt('\n> ');
         sessionId = result.sessionId;
     }
-}
-
-// Maps a keyword found in the user's edit request to the ThemeState
-// template key it actually lives in (e.g. sections/footer-group.json is
-// keyed "footer-group", not "footer"). Checked longest-keyword-first so
-// "header" doesn't shadow a more specific future entry.
-const TEMPLATE_KEYWORD_ALIASES = {
-    footer: 'footer-group',
-    header: 'header-group',
-    'list-collections': 'list-collections',
-    collection: 'collection',
-    product: 'product',
-    cart: 'cart',
-    blog: 'blog',
-    article: 'article',
-    search: 'search',
-    password: 'password',
-    'gift card': 'gift_card',
-    'gift_card': 'gift_card',
-    '404': '404',
-    page: 'page'
-};
-
-/**
- * Infers which ThemeState template an edit request is actually about, by
- * matching keywords in the message against known template keys (falling
- * back to 'index' — the homepage — when nothing more specific matches or
- * the guessed template isn't present in this theme). Without this, every
- * edit request was routed to 'index' regardless of what it mentioned, so a
- * request like "change the footer text" would silently edit an unrelated
- * homepage section instead of sections/footer-group.json.
- */
-function inferTemplateName(message, themeState) {
-    const lower = (message || '').toLowerCase();
-    const availableTemplates = (themeState && themeState.templates) || {};
-    const keywords = Object.keys(TEMPLATE_KEYWORD_ALIASES).sort((a, b) => b.length - a.length);
-    for (const keyword of keywords) {
-        const pattern = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
-        if (pattern.test(lower)) {
-            const candidate = TEMPLATE_KEYWORD_ALIASES[keyword];
-            if (availableTemplates[candidate]) return candidate;
-        }
-    }
-    return 'index';
 }
 
 /**
@@ -310,7 +372,7 @@ async function runEditSession(initialMessage) {
             sessionId,
             schemas,
             themeState: seedThemeState,
-            templateName: inferTemplateName(message, themeState),
+            templateName: 'index',
             autoApply: true,
             themeRoot: DEFAULT_THEME_ROOT
         });
@@ -575,4 +637,4 @@ if (require.main === module) {
     main().catch(console.error);
 }
 
-module.exports = { showMenu, getNichePrompt, resolveNicheTemplatePrompt, runStagedPipeline, runEditSession, rl };
+module.exports = { showMenu, getNichePrompt, resolveNicheTemplatePrompt, runStagedPipeline, runEditSession, parseColorOverrides, confirmOrOverrideColors, rl };

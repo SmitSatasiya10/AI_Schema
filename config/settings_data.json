@@ -1,11 +1,11 @@
 {
   "current": {
-    "colors_solid_button_labels": "#2C3E50",
-    "colors_accent_1": "#F1C40F",
-    "colors_accent_2": "#E74C3C",
-    "colors_text": "#2C3E50",
-    "colors_background_1": "#FEF9E7",
-    "colors_background_2": "#E8F8F5",
+    "colors_solid_button_labels": "#2B2118",
+    "colors_accent_1": "#E85D04",
+    "colors_accent_2": "#F4D06F",
+    "colors_text": "#2B2118",
+    "colors_background_1": "#FFFBF5",
+    "colors_background_2": "#F5E6D3",
     "page_width": 1200,
     "spacing_sections": 36,
     "buttons_border_thickness": 1,
@@ -13,29 +13,29 @@
     "logo_width": 200,
     "mobile_logo_width": 130,
     "content_for_index": [
-      "hero",
-      "ticker",
-      "benefits",
-      "products-main",
-      "story",
-      "break-1",
-      "highlights",
-      "reviews",
-      "signup"
+      "hero-1",
+      "trust-1",
+      "featured-1",
+      "collage-1",
+      "categories-1",
+      "promo-1",
+      "reviews-1",
+      "ticker-1",
+      "newsletter-1"
     ]
   },
   "presets": {
     "Default": {
       "logo_width": 70,
-      "niche": "Fresh Produce Market",
-      "description": "Sun-ripened lemon yellow and vibrant tomato red stimulate appetite and freshness, balanced with organic mint and warm cream backgrounds for a natural, healthy marketplace aesthetic",
-      "colors_accent_1": "#F1C40F",
-      "colors_accent_2": "#E74C3C",
-      "colors_text": "#2C3E50",
-      "colors_background_1": "#FEF9E7",
-      "colors_background_2": "#E8F8F5",
-      "colors_solid_button_labels": "#2C3E50",
-      "gradient_accent_1": "linear-gradient(135deg, #F1C40F 0%, #E74C3C 100%)"
+      "niche": "Pet Supplies",
+      "description": "This palette pairs a vibrant tangerine and cheerful sunny yellow to create a playful, energetic vibe perfect for pets. Warm cream and sand backgrounds keep the store feeling cozy and approachable, while deep espresso text ensures strong readability without the harshness of pure black.",
+      "colors_accent_1": "#E85D04",
+      "colors_accent_2": "#F4D06F",
+      "colors_text": "#2B2118",
+      "colors_background_1": "#FFFBF5",
+      "colors_background_2": "#F5E6D3",
+      "colors_solid_button_labels": "#2B2118",
+      "gradient_accent_1": "linear-gradient(135deg, #E85D04 0%, #F4D06F 100%)"
     }
   },
   "platform_customizations": {

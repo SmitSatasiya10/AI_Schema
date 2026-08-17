@@ -106,18 +106,23 @@ test('runTargetedEdit() — a clear creation request never calls the AI at all, 
     }
 });
 
-test('runTargetedEdit() — an ambiguous target is caught BEFORE any AI call (target resolution runs first)', async () => {
+test('runTargetedEdit() — an ambiguous target gets one bounded AI resolution call, then falls back to the tied candidates when the AI itself is not confident', async () => {
     const template = baseIndexTemplate();
     template.raw.sections['hero-2'] = { type: 'slideshow', settings: {} };
     template.raw.order.push('hero-2');
     const originalFetch = global.fetch;
-    global.fetch = throwingFetch();
+    // No clarifyingQuestion offered -> deterministic code falls back to the
+    // real tied candidates it already had, same as the old zero-AI-call
+    // behavior, just after one bounded resolution attempt.
+    const router = jsonFetch(() => ({ confident: false }));
+    global.fetch = router;
     try {
         const result = await runTargetedEdit('Change the slideshow heading', { themeState: themeState({ index: template }), schemas });
         assert.strictEqual(result.status, 'NEEDS_CLARIFICATION');
         assert.strictEqual(result.targetStatus, 'AMBIGUOUS');
         assert.strictEqual(result.candidates.length, 2);
         assert.ok(result.questions[0].includes('hero-1'));
+        assert.strictEqual(router.callCount(), 1, 'exactly one bounded AI resolution call, no repair needed');
     } finally {
         global.fetch = originalFetch;
     }

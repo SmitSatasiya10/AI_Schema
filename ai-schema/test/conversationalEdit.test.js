@@ -225,38 +225,50 @@ test('splitBoundedClauses() — does not split "and" inside a single descriptive
 });
 
 test('splitBoundedClauses() — a single clause is returned as-is', () => {
-    assert.deepStrictEqual(splitBoundedClauses('Change the hero heading.'), ['Change the hero heading.']);
+    assert.deepStrictEqual(splitBoundedClauses('Change the hero heading to New heading.'), ['Change the hero heading to New heading.']);
 });
 
 // ---------------------------------------------------------------------------
 // §36 Scenario 1 — ambiguous target, then "what would you like to change?",
-// exactly one bounded AI call across the whole 3-turn conversation.
+// one bounded AI resolution call (the AI declines to pick between the tied
+// candidates) plus exactly one bounded operation-proposal call across the
+// whole 3-turn conversation.
 // ---------------------------------------------------------------------------
 
-test('Scenario 1 — ambiguous target -> which one -> what to change -> one targeted operation, one AI call total', async () => {
+test('Scenario 1 — ambiguous target -> which one -> what to change -> one targeted operation, one AI call per stage', async () => {
     const sessionId = 'test-scenario-1';
     const themeId = 'test-scenario-1-theme';
-    const router = jsonFetch(() => ({
-        operation: 'update_block',
-        target: { templateName: 'index', sectionId: 'announcement-banner', blockId: 'banner-slide' },
-        changes: { settings: { text_color: '#ffffff' } }
-    }));
+    const router = jsonFetch(body => {
+        const systemPrompt = body.messages[0].content;
+        if (systemPrompt.includes('EXISTING SECTIONS')) {
+            // Target-resolution stage: decline, same as before — the tied
+            // candidates deterministic code already has are good enough.
+            return { confident: false };
+        }
+        return {
+            operation: 'update_block',
+            target: { templateName: 'index', sectionId: 'announcement-banner', blockId: 'banner-slide' },
+            changes: { settings: { text_color: '#ffffff' } }
+        };
+    });
     try {
         await withFetch(router, async () => {
             const turn1 = await runConversationalEdit('Change the banner.', { sessionId, themeId, schemas, themeState: themeState({ index: twoBannerTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'NEEDS_CLARIFICATION');
             assert.match(turn1.questions[0], /announcement-banner/);
             assert.match(turn1.questions[0], /homepage-hero-banner/);
+            assert.strictEqual(router.callCount(), 1, 'one bounded AI resolution call for the ambiguous turn');
 
             const turn2 = await runConversationalEdit('Announcement banner.', { sessionId, themeId, schemas, themeState: themeState({ index: twoBannerTemplate() }, null, themeId) });
             assert.strictEqual(turn2.status, 'NEEDS_CLARIFICATION');
             assert.strictEqual(turn2.questions[0], 'What would you like to change?');
+            assert.strictEqual(router.callCount(), 1, 'the clarification-answer turn is purely deterministic, no AI call');
 
             const turn3 = await runConversationalEdit('Make the text blue.', { sessionId, themeId, schemas, themeState: themeState({ index: twoBannerTemplate() }, null, themeId) });
             assert.strictEqual(turn3.status, 'PROPOSED', JSON.stringify(turn3.errors));
             assert.strictEqual(turn3.operation.target.sectionId, 'announcement-banner');
             assert.strictEqual(turn3.operation.target.blockId, 'banner-slide');
-            assert.strictEqual(router.callCount(), 1, 'exactly one bounded AI call across the whole 3-turn conversation');
+            assert.strictEqual(router.callCount(), 2, 'one resolution call + one bounded operation-proposal call across the whole 3-turn conversation');
         });
     } finally {
         await cleanupSession(sessionId);
@@ -330,10 +342,10 @@ test('Scenario 4 — an unrelated new request explicitly naming a different sect
         : { operation: 'add_block', target: { templateName: 'index', sectionId: 'testi-1' }, changes: { type: 'column' } });
     try {
         await withFetch(router, async () => {
-            const turn1 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
+            const turn1 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'PROPOSED', JSON.stringify(turn1.errors));
 
-            const turn2 = await runConversationalEdit('Change the testimonials section.', { sessionId, themeId, schemas, themeState: turn1.themeState });
+            const turn2 = await runConversationalEdit('Add a new column block to the testimonials section with the text Amazing Service.', { sessionId, themeId, schemas, themeState: turn1.themeState });
             assert.strictEqual(turn2.status, 'PROPOSED', JSON.stringify(turn2.errors));
             assert.strictEqual(turn2.operation.target.sectionId, 'testi-1');
             assert.notStrictEqual(turn2.operation.target.sectionId, turn1.operation.target.sectionId);
@@ -381,27 +393,36 @@ test('runConversationalEdit() — cancel never calls the AI', async () => {
     }
 });
 
-test('runConversationalEdit() — target ambiguity detection never calls the AI', async () => {
+test('runConversationalEdit() — an ambiguous target gets ONE bounded AI resolution call before asking, never a silent guess', async () => {
     const sessionId = 'test-ai-bound-ambiguous';
+    // The AI itself declines to pick between the tied candidates (no
+    // clarifyingQuestion offered either) — deterministic code falls back to
+    // the tie candidates it already had, exactly like the pre-AI-assisted
+    // behavior, just after one bounded resolution attempt instead of zero.
+    const router = jsonFetch(() => ({ confident: false }));
     try {
-        await withFetch(throwingFetch(), async () => {
+        await withFetch(router, async () => {
             const result = await runConversationalEdit('Change the banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
             assert.strictEqual(result.status, 'NEEDS_CLARIFICATION');
+            assert.strictEqual(router.callCount(), 1, 'exactly one bounded AI resolution call, no repair needed for a validly-shaped confident:false response');
         });
     } finally {
         await cleanupSession(sessionId);
     }
 });
 
-test('runConversationalEdit() — a clarification answer that still needs a second (value) question never calls the AI', async () => {
+test('runConversationalEdit() — a clarification answer that still needs a second (value) question needs no AI call of its own', async () => {
     const sessionId = 'test-ai-bound-value-question';
+    const router = jsonFetch(() => ({ confident: false }));
     try {
-        await withFetch(throwingFetch(), async () => {
+        await withFetch(router, async () => {
             const turn1 = await runConversationalEdit('Change the banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
             assert.strictEqual(turn1.status, 'NEEDS_CLARIFICATION');
+            assert.strictEqual(router.callCount(), 1);
             const turn2 = await runConversationalEdit('Announcement banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
             assert.strictEqual(turn2.status, 'NEEDS_CLARIFICATION');
             assert.strictEqual(turn2.questions[0], 'What would you like to change?');
+            assert.strictEqual(router.callCount(), 1, 'the clarification-answer turn resolves the tied candidate and checks for change details purely deterministically');
         });
     } finally {
         await cleanupSession(sessionId);
@@ -414,14 +435,14 @@ test('runConversationalEdit() — an idempotent repeat of the last message reuse
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'New heading' } } }));
     try {
         await withFetch(router, async () => {
-            const turn1 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
+            const turn1 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'PROPOSED');
             assert.strictEqual(router.callCount(), 1);
 
             // Reuse turn1's OWN resulting ThemeState — the same content the
             // session's version hash now reflects — so this is a genuine
             // repeat, not an (unrelated) stale-context reset.
-            const turn2 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: turn1.themeState });
+            const turn2 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: turn1.themeState });
             assert.strictEqual(turn2.idempotent, true);
             assert.strictEqual(router.callCount(), 1, 'the exact same message against an unchanged ThemeState must not re-call the AI');
         });
@@ -442,7 +463,7 @@ test('runConversationalEdit() — recovers via one bounded repair when the first
         : { operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Repaired heading' } } });
     try {
         await withFetch(router, async () => {
-            const result = await runConversationalEdit('Change the hero heading.', { sessionId, schemas, themeState: themeState({ index: heroTemplate() }) });
+            const result = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, schemas, themeState: themeState({ index: heroTemplate() }) });
             assert.strictEqual(result.status, 'PROPOSED', JSON.stringify(result.errors));
             assert.strictEqual(result.repaired, true);
             assert.strictEqual(router.callCount(), 2, 'exactly one repair attempt');
@@ -459,7 +480,7 @@ test('runConversationalEdit() — FAILED (not silently applied) when still inval
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'ghost-block' }, changes: { settings: { title: 'x' } } }));
     try {
         await withFetch(router, async () => {
-            const result = await runConversationalEdit('Change the hero heading.', { sessionId, schemas, themeState: ts });
+            const result = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, schemas, themeState: ts });
             assert.strictEqual(result.status, 'FAILED');
             assert.ok(result.errors.length > 0);
             assert.strictEqual(router.callCount(), 2);
@@ -545,7 +566,7 @@ test('runConversationalEdit() — an out-of-band ThemeState change is detected a
         : { operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Second edit after external change' } } });
     try {
         await withFetch(router, async () => {
-            const turn1 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
+            const turn1 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'PROPOSED', JSON.stringify(turn1.errors));
 
             // Simulate an out-of-band edit to the live theme between turns —
@@ -569,7 +590,7 @@ test('runConversationalEdit() — a missing target after staleness resets asks f
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'First edit' } } }));
     try {
         await withFetch(router, async () => {
-            const turn1 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
+            const turn1 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'PROPOSED', JSON.stringify(turn1.errors));
 
             const externallyChanged = heroTemplate();
@@ -594,7 +615,7 @@ test('runConversationalEdit() — the updated ThemeState is automatically used o
         : { operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Persisted heading, shorter' } } });
     try {
         await withFetch(router, async () => {
-            const turn1 = await runConversationalEdit('Change the hero heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
+            const turn1 = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, themeId, schemas, themeState: themeState({ index: heroTemplate() }, null, themeId) });
             assert.strictEqual(turn1.status, 'PROPOSED', JSON.stringify(turn1.errors));
 
             const saved = await loadThemeState(themeId);
@@ -617,16 +638,19 @@ test('runConversationalEdit() — the updated ThemeState is automatically used o
 
 test('runConversationalEdit() — cancel clears pending clarification without mutating the theme', async () => {
     const sessionId = 'test-cancel-mid-clarification';
+    const router = jsonFetch(() => ({ confident: false }));
     try {
-        const turn1 = await runConversationalEdit('Change the banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
-        assert.strictEqual(turn1.status, 'NEEDS_CLARIFICATION');
+        await withFetch(router, async () => {
+            const turn1 = await runConversationalEdit('Change the banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
+            assert.strictEqual(turn1.status, 'NEEDS_CLARIFICATION');
 
-        const turn2 = await runConversationalEdit('never mind', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
-        assert.strictEqual(turn2.status, 'IDLE');
+            const turn2 = await runConversationalEdit('never mind', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
+            assert.strictEqual(turn2.status, 'IDLE');
 
-        const turn3 = await runConversationalEdit('Announcement banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
-        // The pending clarification is gone — this is now a fresh, unresolvable request.
-        assert.notStrictEqual(turn3.status, 'PROPOSED');
+            const turn3 = await runConversationalEdit('Announcement banner.', { sessionId, schemas, themeState: themeState({ index: twoBannerTemplate() }) });
+            // The pending clarification is gone — this is now a fresh, unresolvable request.
+            assert.notStrictEqual(turn3.status, 'PROPOSED');
+        });
     } finally {
         await cleanupSession(sessionId);
     }
@@ -637,7 +661,7 @@ test('runConversationalEdit() — a FAILED conversation remains resumable; a cor
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'ghost-block' }, changes: { settings: { title: 'x' } } }));
     try {
         await withFetch(router, async () => {
-            const failed = await runConversationalEdit('Change the hero heading.', { sessionId, schemas, themeState: themeState({ index: heroTemplate() }) });
+            const failed = await runConversationalEdit('Change the hero heading to New heading.', { sessionId, schemas, themeState: themeState({ index: heroTemplate() }) });
             assert.strictEqual(failed.status, 'FAILED');
         });
         const router2 = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Corrected' } } }));
@@ -672,7 +696,7 @@ test('runConversationalEdit() — autoApply + dryRunApply reports the change wit
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Would change' } } }));
     try {
         await withFetch(router, async () => {
-            const result = await runConversationalEdit('Change the hero heading.', {
+            const result = await runConversationalEdit('Change the hero heading to New heading.', {
                 sessionId, themeId, schemas, themeState: themeState({ index: { sourceFile: 'templates/index.json', raw: JSON.parse(JSON.stringify(original)) } }, null, themeId),
                 autoApply: true, dryRunApply: true, themeRoot
             });
@@ -695,7 +719,7 @@ test('runConversationalEdit() — autoApply writes ONLY the targeted template, s
     const router = jsonFetch(() => ({ operation: 'update_block', target: { templateName: 'index', sectionId: 'homepage-hero', blockId: 'hero-heading' }, changes: { settings: { title: 'Applied heading' } } }));
     try {
         await withFetch(router, async () => {
-            const result = await runConversationalEdit('Change the hero heading.', {
+            const result = await runConversationalEdit('Change the hero heading to New heading.', {
                 sessionId, themeId, schemas, themeState: themeState({ index: { sourceFile: 'templates/index.json', raw: JSON.parse(JSON.stringify(original)) } }, null, themeId),
                 autoApply: true, themeRoot
             });

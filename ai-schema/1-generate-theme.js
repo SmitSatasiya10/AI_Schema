@@ -177,6 +177,16 @@ async function runFullPipeline(userPrompt, options = {}) {
             console.log(`   Primary color: ${colors.colors_accent_1}\n`);
         }
 
+        // Optional interactive gate (§ "user approves/overrides AI colors"):
+        // the caller (the CLI) decides HOW to ask — this function only
+        // guarantees the AI's chosen palette is never used without giving
+        // the caller a chance to confirm or replace it first, when it wants
+        // one. Omitted entirely (e.g. non-interactive/test callers), colors
+        // pass through unchanged — same behavior as before this hook existed.
+        if (typeof options.onColorsReady === 'function') {
+            colors = await options.onColorsReady(colors);
+        }
+
         let validation;
         let themeState = null; // built here (stagedMode) or lazily in STEP 7 (mergeApplyMode) — never rebuilt twice
         if (stagedMode) {
