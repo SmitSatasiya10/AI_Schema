@@ -2,6 +2,11 @@
     "id": "product_inventory",
     "label": "Inventory/Stock Status",
     "purpose": "Display stock level and create urgency with low stock messages",
+    "category": "conversion",
+    "tags": [
+        "urgency",
+        "stock"
+    ],
     "settings": {
         "style": [
             "progress-bar",

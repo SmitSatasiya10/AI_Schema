@@ -2,6 +2,8 @@
     "id": "slideshow",
     "label": "Slideshow",
     "purpose": "Image slideshow with text overlay and buttons",
+    "category": "hero",
+    "tags": [],
     "allowed_on": [
         "index",
         "product",
@@ -33,6 +35,8 @@
             "false"
         ]
     },
-    "allowed_blocks": ["slide"],
+    "allowed_blocks": [
+        "slide"
+    ],
     "_notes": "Slideshow should have at least 2 slides. Text in slide blocks must be wrapped with <p> tags."
 }

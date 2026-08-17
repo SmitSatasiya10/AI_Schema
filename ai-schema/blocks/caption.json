@@ -2,6 +2,8 @@
     "id": "caption",
     "label": "Caption",
     "purpose": "Small caption text block",
+    "category": "content",
+    "tags": [],
     "settings": {
         "text": "text",
         "text_style": [

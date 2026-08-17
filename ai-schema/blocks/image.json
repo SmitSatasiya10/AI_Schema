@@ -2,6 +2,8 @@
     "id": "image",
     "label": "Image",
     "purpose": "Image block for content sections",
+    "category": "media",
+    "tags": [],
     "settings": {
         "image": "image_picker",
         "width": [

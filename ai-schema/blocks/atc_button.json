@@ -2,6 +2,11 @@
     "id": "atc-button",
     "label": "Add to Cart Button",
     "purpose": "Product add to cart button",
+    "category": "conversion",
+    "tags": [
+        "cta",
+        "add-to-cart"
+    ],
     "settings": {
         "product": "product_picker",
         "button_label": "text",

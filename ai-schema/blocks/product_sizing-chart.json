@@ -2,6 +2,10 @@
     "id": "product_sizing-chart",
     "label": "Size Chart",
     "purpose": "Display size chart popup for apparel and sizing information",
+    "category": "product-detail",
+    "tags": [
+        "sizing"
+    ],
     "settings": {
         "button_label": {
             "type": "richtext",

@@ -2,6 +2,10 @@
     "id": "product_sticky-atc",
     "label": "Sticky Add to Cart",
     "purpose": "Floating add to cart bar that appears when scrolling past buy buttons",
+    "category": "conversion",
+    "tags": [
+        "cta"
+    ],
     "settings": {
         "show_on_mobile": {
             "type": "checkbox",

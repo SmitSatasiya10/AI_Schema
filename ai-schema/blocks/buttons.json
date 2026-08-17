@@ -2,6 +2,10 @@
     "id": "buttons",
     "label": "Buttons",
     "purpose": "One or two CTA buttons with customizable style",
+    "category": "conversion",
+    "tags": [
+        "cta"
+    ],
     "settings": {
         "button_label_1": "text",
         "button_link_1": "url",

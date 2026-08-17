@@ -2,6 +2,8 @@
     "id": "product_title",
     "label": "Product Title",
     "purpose": "Display product title/name on product page",
+    "category": "product-detail",
+    "tags": [],
     "settings": {
         "uppercase_title": {
             "type": "checkbox",

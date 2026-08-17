@@ -2,6 +2,10 @@
     "id": "email-signup",
     "label": "Email Signup",
     "purpose": "Email newsletter signup form",
+    "category": "form-input",
+    "tags": [
+        "newsletter"
+    ],
     "settings": {
         "heading": "text",
         "subheading": "text",

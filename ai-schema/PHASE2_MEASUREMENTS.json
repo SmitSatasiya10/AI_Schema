@@ -1,0 +1,193 @@
+{
+  "measuredAt": "2026-08-17T04:32:23.169Z",
+  "baseline": {
+    "sectionSchemaCount": 16,
+    "blockSchemaCount": 53,
+    "systemPromptChars": 64260,
+    "estimatedSystemPromptTokens": 16065
+  },
+  "scenarios": [
+    {
+      "scenario": "pet wellness",
+      "prompt": "Create a premium pet wellness store for dogs and cats.",
+      "templateName": "index",
+      "mode": "RETRIEVAL",
+      "fallbackReason": null,
+      "selectedSectionIds": [
+        "collage",
+        "comparison-table",
+        "content-tabs",
+        "custom-columns",
+        "featured-collection",
+        "icon-bar",
+        "image-with-text",
+        "results",
+        "slideshow",
+        "testimonials",
+        "vertical-ticker"
+      ],
+      "selectedSectionCount": 11,
+      "selectedBlockCount": 23,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 30796,
+        "estimatedTokens": 7699
+      },
+      "reductionPct": 52.1
+    },
+    {
+      "scenario": "luxury fashion",
+      "prompt": "Create a luxury fashion store.",
+      "templateName": "index",
+      "mode": "RETRIEVAL",
+      "fallbackReason": null,
+      "selectedSectionIds": [
+        "collage",
+        "comparison-table",
+        "content-tabs",
+        "custom-columns",
+        "featured-collection",
+        "icon-bar",
+        "image-with-text",
+        "results",
+        "slideshow",
+        "testimonials",
+        "vertical-ticker"
+      ],
+      "selectedSectionCount": 11,
+      "selectedBlockCount": 23,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 30796,
+        "estimatedTokens": 7699
+      },
+      "reductionPct": 52.1
+    },
+    {
+      "scenario": "SaaS landing",
+      "prompt": "Create a modern SaaS landing page.",
+      "templateName": "index",
+      "mode": "RETRIEVAL",
+      "fallbackReason": null,
+      "selectedSectionIds": [
+        "collage",
+        "comparison-table",
+        "content-tabs",
+        "custom-columns",
+        "featured-collection",
+        "icon-bar",
+        "image-with-text",
+        "results",
+        "slideshow",
+        "testimonials",
+        "vertical-ticker"
+      ],
+      "selectedSectionCount": 11,
+      "selectedBlockCount": 23,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 30796,
+        "estimatedTokens": 7699
+      },
+      "reductionPct": 52.1
+    },
+    {
+      "scenario": "descriptive (testimonials + trust + countdown)",
+      "prompt": "Build a store with customer testimonials, trust badges, and a countdown timer for urgency.",
+      "templateName": "index",
+      "mode": "RETRIEVAL",
+      "fallbackReason": null,
+      "selectedSectionIds": [
+        "collage",
+        "comparison-table",
+        "content-tabs",
+        "custom-columns",
+        "featured-collection",
+        "horizontal-ticker",
+        "icon-bar",
+        "image-with-text",
+        "results",
+        "slideshow",
+        "testimonials",
+        "vertical-ticker"
+      ],
+      "selectedSectionCount": 12,
+      "selectedBlockCount": 23,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 31971,
+        "estimatedTokens": 7993
+      },
+      "reductionPct": 50.2
+    },
+    {
+      "scenario": "product page",
+      "prompt": "Create a product page for a premium pet supplement.",
+      "templateName": "product",
+      "mode": "RETRIEVAL",
+      "fallbackReason": null,
+      "selectedSectionIds": [
+        "main-product"
+      ],
+      "selectedSectionCount": 1,
+      "selectedBlockCount": 36,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 41766,
+        "estimatedTokens": 10442
+      },
+      "reductionPct": 35
+    },
+    {
+      "scenario": "vague / no signal",
+      "prompt": "asdf qwerty",
+      "templateName": "index",
+      "mode": "FULL_FALLBACK",
+      "fallbackReason": "no retrieval rules matched the prompt (zero confidence)",
+      "selectedSectionIds": [
+        "collage",
+        "comparison-table",
+        "contact-form",
+        "content-tabs",
+        "custom-columns",
+        "featured-collection",
+        "horizontal-ticker",
+        "icon-bar",
+        "image-with-text",
+        "main-product",
+        "newsletter",
+        "results",
+        "section-divider",
+        "slideshow",
+        "testimonials",
+        "vertical-ticker"
+      ],
+      "selectedSectionCount": 16,
+      "selectedBlockCount": 53,
+      "before": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "after": {
+        "chars": 64260,
+        "estimatedTokens": 16065
+      },
+      "reductionPct": 0
+    }
+  ]
+}

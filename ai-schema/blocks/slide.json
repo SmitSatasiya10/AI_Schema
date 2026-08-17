@@ -2,6 +2,8 @@
     "id": "slide",
     "label": "Slide",
     "purpose": "Individual slide in a slideshow with image and text",
+    "category": "hero",
+    "tags": [],
     "_notes": "The 'heading' field is plain text and should NOT be wrapped with tags. The 'text' field is richtext and MUST be wrapped with <p> tags.",
     "settings": {
         "image": "image_picker",

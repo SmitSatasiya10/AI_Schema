@@ -2,6 +2,8 @@
     "id": "featured-collection",
     "label": "Featured Collection",
     "purpose": "Display a collection of products",
+    "category": "product-showcase",
+    "tags": [],
     "allowed_on": [
         "index",
         "product",

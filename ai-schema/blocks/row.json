@@ -2,6 +2,11 @@
     "id": "row",
     "label": "Row",
     "purpose": "Generic row block used in multiple sections with different field requirements",
+    "category": "social-proof",
+    "tags": [
+        "stats",
+        "comparison"
+    ],
     "_notes": "IMPORTANT: The 'row' block has DIFFERENT settings depending on the section. For 'results' section: percentage (number), row_heading (text), row_text (richtext - MUST wrap with <p> tags). For 'comparison-table' section: benefit (inline_richtext), us, others, others_2, others_3 (all checkboxes). Check which section you're adding blocks to!",
     "settings": {
         "_for_results_section": {

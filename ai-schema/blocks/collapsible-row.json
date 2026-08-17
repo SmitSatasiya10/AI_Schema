@@ -2,10 +2,24 @@
     "id": "collapsible-row",
     "label": "Collapsible Row",
     "purpose": "Accordion/collapsible content section with expandable rows",
+    "category": "content",
+    "tags": [
+        "expandable",
+        "faq"
+    ],
     "settings": {
         "heading": "text",
         "content": "richtext",
-        "icon": ["none", "package", "info", "star", "checkmark", "return", "truck", "question"],
+        "icon": [
+            "none",
+            "package",
+            "info",
+            "star",
+            "checkmark",
+            "return",
+            "truck",
+            "question"
+        ],
         "open": {
             "type": "checkbox",
             "default": false

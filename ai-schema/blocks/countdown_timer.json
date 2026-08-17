@@ -2,6 +2,10 @@
     "id": "countdown-timer",
     "label": "Countdown Timer",
     "purpose": "Display countdown timer to specific date/time",
+    "category": "conversion",
+    "tags": [
+        "urgency"
+    ],
     "settings": {
         "end_date": "text",
         "end_time": "text",

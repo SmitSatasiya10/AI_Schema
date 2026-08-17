@@ -2,6 +2,10 @@
     "id": "product_subscription",
     "label": "Subscription Widget",
     "purpose": "Offer subscription/recurring purchase option with discount",
+    "category": "conversion",
+    "tags": [
+        "subscription"
+    ],
     "settings": {
         "show_subscription_option": {
             "type": "checkbox",

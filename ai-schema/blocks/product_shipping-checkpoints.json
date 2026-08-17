@@ -2,6 +2,10 @@
     "id": "product_shipping-checkpoints",
     "label": "Shipping Checkpoints",
     "purpose": "Display shipping benefits and trust signals with icons",
+    "category": "trust-badges",
+    "tags": [
+        "shipping"
+    ],
     "settings": {
         "icon_1": {
             "type": "text",

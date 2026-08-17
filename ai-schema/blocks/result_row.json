@@ -2,6 +2,10 @@
     "id": "row",
     "label": "Result Row",
     "purpose": "Individual result/statistic row with percentage",
+    "category": "social-proof",
+    "tags": [
+        "stats"
+    ],
     "settings": {
         "percentage": {
             "type": "number",

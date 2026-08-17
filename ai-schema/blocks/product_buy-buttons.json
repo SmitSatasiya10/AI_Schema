@@ -2,6 +2,11 @@
     "id": "product_buy-buttons",
     "label": "Buy Buttons",
     "purpose": "Add to cart and buy now buttons with optional quantity selector",
+    "category": "product-detail",
+    "tags": [
+        "cta",
+        "add-to-cart"
+    ],
     "settings": {
         "show_add_to_cart": {
             "type": "checkbox",

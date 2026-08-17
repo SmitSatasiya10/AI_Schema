@@ -7,7 +7,9 @@
         "generate": "node 1-generate-theme.js",
         "menu": "node 3-interactive-menu.js",
         "copy": "node 2-copy-to-theme.js",
-        "start": "node 3-interactive-menu.js"
+        "start": "node 3-interactive-menu.js",
+        "test": "node --test",
+        "build:index": "node capability-index.js"
     },
     "keywords": [
         "shopify",

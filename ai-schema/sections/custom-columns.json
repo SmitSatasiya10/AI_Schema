@@ -2,6 +2,11 @@
     "id": "custom-columns",
     "label": "Custom Columns (Old)",
     "purpose": "Legacy multi-column layout with various content blocks distributed across columns",
+    "category": "content",
+    "tags": [
+        "layout",
+        "legacy"
+    ],
     "allowed_on": [
         "index",
         "page",

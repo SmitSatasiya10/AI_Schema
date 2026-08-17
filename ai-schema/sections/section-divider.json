@@ -2,6 +2,8 @@
     "id": "section-divider",
     "label": "Section Divider",
     "purpose": "Visual divider between sections with customizable style",
+    "category": "layout-structural",
+    "tags": [],
     "allowed_on": [
         "index",
         "page",

@@ -7,6 +7,7 @@
 
 const readline = require('readline');
 const { runFullPipeline } = require('./1-generate-theme');
+const { understandRequest } = require('./clarification');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -36,11 +37,12 @@ async function showMenu() {
     console.log('  2️⃣  Generate Product Page from niche templates');
     console.log('  3️⃣  Generate both Homepage + Product Page');
     console.log('  4️⃣  Custom description (homepage)');
-    console.log('  5️⃣  View documentation');
-    console.log('  6️⃣  Just copy existing files');
-    console.log('  7️⃣  Exit\n');
+    console.log('  5️⃣  Custom description with AI clarification (homepage)');
+    console.log('  6️⃣  View documentation');
+    console.log('  7️⃣  Just copy existing files');
+    console.log('  8️⃣  Exit\n');
 
-    const choice = await prompt('Select option (1-7): ');
+    const choice = await prompt('Select option (1-8): ');
     return choice.trim();
 }
 
@@ -312,6 +314,40 @@ async function main() {
                     break;
 
                 case '5':
+                    // Custom homepage prompt with Phase 3 clarification loop.
+                    // Real Q&A loop (supersedes the canned niche picklist for
+                    // this path only — options 1-4 are left exactly as they
+                    // were, per the phase's own rollback requirement).
+                    const initialDescription = await prompt(
+                        '\n📝 Describe your store:\n> '
+                    );
+                    if (!initialDescription.trim()) {
+                        console.log('❌ Description cannot be empty');
+                        await prompt('Press Enter to continue...');
+                        break;
+                    }
+
+                    let understanding = await understandRequest(initialDescription.trim());
+                    let rounds = 0;
+                    while (understanding.status === 'NEEDS_CLARIFICATION' && rounds < 5) {
+                        console.log('\n❓ A few quick questions before we generate your store:\n');
+                        understanding.questions.forEach((q, i) => console.log(`   ${i + 1}. ${q}`));
+                        const answer = await prompt('\n> ');
+                        understanding = await understandRequest(answer.trim(), { sessionId: understanding.sessionId });
+                        rounds++;
+                    }
+
+                    if (understanding.status !== 'READY') {
+                        console.log('\n⚠️  Could not fully resolve requirements after several rounds — generating with what we have.\n');
+                    } else {
+                        console.log('\n✅ Got it! Generating your store...\n');
+                    }
+
+                    await runFullPipeline(initialDescription.trim(), { autoCopy: true });
+                    await prompt('\n✅ Done! Press Enter to continue...');
+                    break;
+
+                case '6':
                     // View documentation
                     console.log('\n� Documentation:\n');
                     console.log('AI Theme Generation:');
@@ -324,7 +360,7 @@ async function main() {
                     await prompt('Press Enter to continue...');
                     break;
 
-                case '6':
+                case '7':
                     // Just copy
                     console.log('\n📋 Copying existing files...\n');
                     const { copyGeneratedFilesToTheme } = require('./2-copy-to-theme');
@@ -332,14 +368,14 @@ async function main() {
                     await prompt('Press Enter to continue...');
                     break;
 
-                case '7':
+                case '8':
                     // Exit
                     console.log('\n👋 Goodbye!\n');
                     rl.close();
                     return;
 
                 default:
-                    console.log('\n❌ Invalid option. Please choose 1-7.\n');
+                    console.log('\n❌ Invalid option. Please choose 1-8.\n');
                     await prompt('Press Enter to continue...');
             }
         }

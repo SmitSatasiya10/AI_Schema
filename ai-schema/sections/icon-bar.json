@@ -2,6 +2,11 @@
     "id": "icon-bar",
     "label": "Icon Bar",
     "purpose": "Display icons with text in a horizontal row for features or benefits",
+    "category": "content",
+    "tags": [
+        "benefits",
+        "icons"
+    ],
     "allowed_on": [
         "index",
         "page",

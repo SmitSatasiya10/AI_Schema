@@ -1,11 +1,11 @@
 {
   "current": {
-    "colors_solid_button_labels": "#FAFAF9",
-    "colors_accent_1": "#15803D",
-    "colors_accent_2": "#C2410C",
-    "colors_text": "#292524",
-    "colors_background_1": "#FAFAF9",
-    "colors_background_2": "#F0FDF4",
+    "colors_solid_button_labels": "#ffffff",
+    "colors_accent_1": "#111111",
+    "colors_accent_2": "#222222",
+    "colors_text": "#333333",
+    "colors_background_1": "#ffffff",
+    "colors_background_2": "#eeeeee",
     "page_width": 1200,
     "spacing_sections": 36,
     "buttons_border_thickness": 1,
@@ -13,30 +13,22 @@
     "logo_width": 200,
     "mobile_logo_width": 130,
     "content_for_index": [
-      "hero-slideshow",
-      "certifications-ticker",
-      "benefits-icons",
-      "featured-products",
-      "lifestyle-story",
-      "customer-love",
-      "nutrition-impact",
-      "nutrition-tabs",
-      "lifestyle-collage",
-      "newsletter-signup"
+      "hero-1",
+      "testimonials-1"
     ]
   },
   "presets": {
     "Default": {
       "logo_width": 70,
-      "niche": "Plant-Based Vegan Foods",
-      "description": "Fresh emerald green evokes plant vitality and health-conscious nutrition, while warm terracotta stimulates appetite and represents earth-grown ingredients. Cream backgrounds provide a clean, organic canvas for food photography, with sage secondary backgrounds reinforcing the natural lifestyle aesthetic. High-contrast charcoal text ensures accessibility without harsh pure black.",
-      "colors_accent_1": "#15803D",
-      "colors_accent_2": "#C2410C",
-      "colors_text": "#292524",
-      "colors_background_1": "#FAFAF9",
-      "colors_background_2": "#F0FDF4",
-      "colors_solid_button_labels": "#FAFAF9",
-      "gradient_accent_1": "linear-gradient(135deg, #15803D 0%, #C2410C 100%)"
+      "niche": "test",
+      "description": "test palette",
+      "colors_accent_1": "#111111",
+      "colors_accent_2": "#222222",
+      "colors_text": "#333333",
+      "colors_background_1": "#ffffff",
+      "colors_background_2": "#eeeeee",
+      "colors_solid_button_labels": "#ffffff",
+      "gradient_accent_1": "linear-gradient(135deg, #111111 0%, #222222 100%)"
     }
   },
   "platform_customizations": {

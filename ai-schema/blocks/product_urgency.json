@@ -2,6 +2,10 @@
     "id": "product_urgency",
     "label": "Urgency Text",
     "purpose": "Display time-sensitive messages to create urgency and drive conversions",
+    "category": "conversion",
+    "tags": [
+        "urgency"
+    ],
     "settings": {
         "urgency_type": [
             "visitors",

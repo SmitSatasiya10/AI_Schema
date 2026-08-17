@@ -1,0 +1,1208 @@
+{
+  "builtAt": "2026-08-17T07:20:25.403Z",
+  "sectionCount": 26,
+  "blockCount": 58,
+  "sections": [
+    {
+      "id": "collage",
+      "label": "Collage",
+      "category": "content",
+      "tags": [
+        "visual",
+        "product"
+      ],
+      "summary": "Display a collage of images and products in various layouts",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 2,
+      "maxBlocks": 3
+    },
+    {
+      "id": "collapsible-content",
+      "label": "Collapsible Content",
+      "category": "content",
+      "tags": [
+        "expandable",
+        "faq"
+      ],
+      "summary": "Heading/image plus a stack of collapsible (accordion) content rows — commonly used for FAQ pages",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "colors-changer",
+      "label": "Store Colors Changer",
+      "category": "misc",
+      "tags": [
+        "colors",
+        "theme-settings"
+      ],
+      "summary": "Site-wide color scheme override section (accent, text, background, product card colors)",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": false,
+      "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "comparison-table",
+      "label": "Comparison Table",
+      "category": "conversion",
+      "tags": [
+        "comparison",
+        "benefits"
+      ],
+      "summary": "Product comparison table with features",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "contact-form",
+      "label": "Contact Form",
+      "category": "form-input",
+      "tags": [
+        "contact"
+      ],
+      "summary": "Contact form with customizable fields",
+      "allowed_on": [
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 3,
+      "maxBlocks": null
+    },
+    {
+      "id": "content-tabs",
+      "label": "Content Tabs",
+      "category": "content",
+      "tags": [
+        "tabs"
+      ],
+      "summary": "Tabbed content with each tab containing rich content including images, text, videos",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "custom-columns-new",
+      "label": "Custom Columns V2",
+      "category": "layout-structural",
+      "tags": [
+        "columns",
+        "layout"
+      ],
+      "summary": "Flexible multi-column layout section for arbitrary content blocks",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "custom-columns",
+      "label": "Custom Columns (Old)",
+      "category": "content",
+      "tags": [
+        "layout",
+        "legacy"
+      ],
+      "summary": "Legacy multi-column layout with various content blocks distributed across columns",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 16,
+      "maxBlocks": null
+    },
+    {
+      "id": "email-signup-banner",
+      "label": "Email Signup Banner",
+      "category": "conversion",
+      "tags": [
+        "email",
+        "signup",
+        "newsletter"
+      ],
+      "summary": "Full-width banner with a background image and an email capture form",
+      "allowed_on": [
+        "index",
+        "password"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 3,
+      "maxBlocks": null
+    },
+    {
+      "id": "facebook-testimonials",
+      "label": "Facebook Testimonials",
+      "category": "social-proof",
+      "tags": [
+        "facebook",
+        "testimonial",
+        "reviews"
+      ],
+      "summary": "Display a slider of Facebook-style customer testimonial posts",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "featured-collection",
+      "label": "Featured Collection",
+      "category": "product-showcase",
+      "tags": [],
+      "summary": "Display a collection of products",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": false,
+      "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "horizontal-ticker",
+      "label": "Horizontal Ticker",
+      "category": "trust-badges",
+      "tags": [
+        "ticker",
+        "certifications"
+      ],
+      "summary": "Scrolling content ticker that moves horizontally with text, images, or videos",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 3,
+      "maxBlocks": null
+    },
+    {
+      "id": "icon-bar",
+      "label": "Icon Bar",
+      "category": "content",
+      "tags": [
+        "benefits",
+        "icons"
+      ],
+      "summary": "Display icons with text in a horizontal row for features or benefits",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "image-slider",
+      "label": "Image/Video Slider",
+      "category": "media",
+      "tags": [
+        "slider",
+        "gallery"
+      ],
+      "summary": "Slider gallery of images and/or videos",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 2,
+      "maxBlocks": null
+    },
+    {
+      "id": "image-with-text",
+      "label": "Image with Text",
+      "category": "content",
+      "tags": [
+        "visual"
+      ],
+      "summary": "Image with accompanying text content",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 5,
+      "maxBlocks": null
+    },
+    {
+      "id": "main-product",
+      "label": "Main Product",
+      "category": "product-detail",
+      "tags": [],
+      "summary": "Main product information section with all product blocks",
+      "allowed_on": [
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 44,
+      "maxBlocks": null
+    },
+    {
+      "id": "newsletter",
+      "label": "Email Signup",
+      "category": "form-input",
+      "tags": [
+        "newsletter"
+      ],
+      "summary": "Newsletter subscription form",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 3,
+      "maxBlocks": null
+    },
+    {
+      "id": "related-products",
+      "label": "Related Products",
+      "category": "product-showcase",
+      "tags": [
+        "related",
+        "recommendations"
+      ],
+      "summary": "Show a grid of products related to the current product, on product pages",
+      "allowed_on": [
+        "product"
+      ],
+      "hasBlocks": false,
+      "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "results",
+      "label": "Results",
+      "category": "social-proof",
+      "tags": [
+        "stats"
+      ],
+      "summary": "Display statistics and results with percentages",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "rich-text",
+      "label": "Rich Text",
+      "category": "content",
+      "tags": [
+        "text"
+      ],
+      "summary": "General-purpose text content section built from stackable content blocks",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 8,
+      "maxBlocks": null
+    },
+    {
+      "id": "section-divider",
+      "label": "Section Divider",
+      "category": "layout-structural",
+      "tags": [],
+      "summary": "Visual divider between sections with customizable style",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": false,
+      "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "shoppable-image",
+      "label": "Shoppable Image",
+      "category": "product-showcase",
+      "tags": [
+        "shoppable",
+        "hotspot"
+      ],
+      "summary": "A large lifestyle image with clickable product hotspots",
+      "allowed_on": [
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "slideshow",
+      "label": "Slideshow",
+      "category": "hero",
+      "tags": [],
+      "summary": "Image slideshow with text overlay and buttons",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "testimonials",
+      "label": "Testimonials",
+      "category": "social-proof",
+      "tags": [
+        "testimonial",
+        "reviews"
+      ],
+      "summary": "Customer reviews and testimonials slider",
+      "allowed_on": [
+        "index",
+        "product",
+        "page"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    },
+    {
+      "id": "track-order",
+      "label": "Track Order",
+      "category": "form-input",
+      "tags": [
+        "order-tracking"
+      ],
+      "summary": "Order-tracking form where a customer enters a tracking number",
+      "allowed_on": [
+        "page"
+      ],
+      "hasBlocks": false,
+      "allowedBlockCount": 0,
+      "maxBlocks": null
+    },
+    {
+      "id": "vertical-ticker",
+      "label": "Vertical Ticker",
+      "category": "content",
+      "tags": [
+        "ticker"
+      ],
+      "summary": "Scrolling text ticker that moves vertically",
+      "allowed_on": [
+        "index",
+        "page",
+        "product"
+      ],
+      "hasBlocks": true,
+      "allowedBlockCount": 1,
+      "maxBlocks": null
+    }
+  ],
+  "blocks": [
+    {
+      "id": "accordion",
+      "label": "Accordion",
+      "category": "content",
+      "tags": [
+        "expandable"
+      ],
+      "summary": "Expandable/collapsible content section",
+      "scope": "standalone",
+      "usedBySectionIds": []
+    },
+    {
+      "id": "atc-button",
+      "label": "Add to Cart Button",
+      "category": "conversion",
+      "tags": [
+        "cta",
+        "add-to-cart"
+      ],
+      "summary": "Product add to cart button",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "button",
+      "label": "Link Button",
+      "category": "conversion",
+      "tags": [
+        "cta"
+      ],
+      "summary": "Call-to-action button block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "image-with-text",
+        "main-product",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "buttons",
+      "label": "Buttons",
+      "category": "conversion",
+      "tags": [
+        "cta"
+      ],
+      "summary": "One or two CTA buttons with customizable style",
+      "scope": "local",
+      "usedBySectionIds": [
+        "custom-columns"
+      ]
+    },
+    {
+      "id": "caption",
+      "label": "Caption",
+      "category": "content",
+      "tags": [],
+      "summary": "Small caption text block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "image-with-text",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "collapsible-row-content",
+      "label": "Collapsible Row",
+      "category": "content",
+      "tags": [
+        "expandable",
+        "faq"
+      ],
+      "summary": "An individual expandable row within a Collapsible Content section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "collapsible-content"
+      ]
+    },
+    {
+      "id": "collapsible-row",
+      "label": "Collapsible Row",
+      "category": "content",
+      "tags": [
+        "expandable",
+        "faq"
+      ],
+      "summary": "Accordion/collapsible content section with expandable rows",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "collection",
+      "label": "Collection",
+      "category": "product-showcase",
+      "tags": [],
+      "summary": "Feature a collection",
+      "scope": "standalone",
+      "usedBySectionIds": []
+    },
+    {
+      "id": "column",
+      "label": "Column",
+      "category": "social-proof",
+      "tags": [
+        "testimonial",
+        "benefits"
+      ],
+      "summary": "Testimonial, icon bar, or grid column block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns-new",
+        "facebook-testimonials",
+        "icon-bar",
+        "testimonials"
+      ]
+    },
+    {
+      "id": "container",
+      "label": "Container",
+      "category": "layout-structural",
+      "tags": [
+        "layout",
+        "container"
+      ],
+      "summary": "A layout box that groups nested content blocks with configurable direction, background, and border styling",
+      "scope": "local",
+      "usedBySectionIds": [
+        "rich-text"
+      ]
+    },
+    {
+      "id": "countdown-timer",
+      "label": "Countdown Timer",
+      "category": "conversion",
+      "tags": [
+        "urgency"
+      ],
+      "summary": "Display countdown timer to specific date/time",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "custom-liquid",
+      "label": "Custom Liquid",
+      "category": "misc",
+      "tags": [
+        "custom-code"
+      ],
+      "summary": "Custom Liquid code block for advanced customization",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "email_form",
+      "label": "Email Form",
+      "category": "form-input",
+      "tags": [
+        "newsletter"
+      ],
+      "summary": "Newsletter email signup form block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "email-signup-banner",
+        "newsletter"
+      ]
+    },
+    {
+      "id": "email-signup",
+      "label": "Email Signup",
+      "category": "form-input",
+      "tags": [
+        "newsletter"
+      ],
+      "summary": "Email newsletter signup form",
+      "scope": "local",
+      "usedBySectionIds": [
+        "custom-columns"
+      ]
+    },
+    {
+      "id": "field_row",
+      "label": "Input Row",
+      "category": "form-input",
+      "tags": [],
+      "summary": "A row of up to two form input fields, used inside the Contact Form section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "contact-form"
+      ]
+    },
+    {
+      "id": "heading",
+      "label": "Heading",
+      "category": "content",
+      "tags": [],
+      "summary": "Text heading block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "email-signup-banner",
+        "image-with-text",
+        "main-product",
+        "newsletter",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "hotspot",
+      "label": "Product Hotspot",
+      "category": "product-showcase",
+      "tags": [
+        "shoppable",
+        "hotspot"
+      ],
+      "summary": "A clickable product marker positioned on a Shoppable Image section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "shoppable-image"
+      ]
+    },
+    {
+      "id": "icon-with-text",
+      "label": "Icon with Text",
+      "category": "content",
+      "tags": [
+        "benefits",
+        "icons"
+      ],
+      "summary": "Display icon with heading and description text",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "image",
+      "label": "Image",
+      "category": "media",
+      "tags": [],
+      "summary": "Image block for content sections",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "collage",
+        "custom-columns",
+        "horizontal-ticker",
+        "image-with-text",
+        "main-product"
+      ]
+    },
+    {
+      "id": "image_slide",
+      "label": "Image Slide",
+      "category": "media",
+      "tags": [
+        "slider",
+        "gallery"
+      ],
+      "summary": "A single image slide within an Image/Video Slider section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "image-slider"
+      ]
+    },
+    {
+      "id": "media-slider",
+      "label": "Media Slider",
+      "category": "media",
+      "tags": [
+        "slider"
+      ],
+      "summary": "Slideshow of images or videos",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "paragraph",
+      "label": "Paragraph",
+      "category": "content",
+      "tags": [],
+      "summary": "Rich text paragraph block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "email-signup-banner",
+        "newsletter"
+      ]
+    },
+    {
+      "id": "payment-badges",
+      "label": "Payment Badges",
+      "category": "trust-badges",
+      "tags": [
+        "payment"
+      ],
+      "summary": "Display accepted payment method icons",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "product-rating",
+      "label": "Product Rating",
+      "category": "trust-badges",
+      "tags": [
+        "rating",
+        "reviews"
+      ],
+      "summary": "Display product rating and review count",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product",
+      "label": "Product",
+      "category": "product-showcase",
+      "tags": [],
+      "summary": "Feature a product with optional secondary image on hover",
+      "scope": "local",
+      "usedBySectionIds": [
+        "collage"
+      ]
+    },
+    {
+      "id": "product_award-badge",
+      "label": "Award Badge",
+      "category": "trust-badges",
+      "tags": [
+        "awards",
+        "certifications"
+      ],
+      "summary": "Display trust badges, awards, certifications above the fold",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_bundle-offer",
+      "label": "Bundle Offer",
+      "category": "conversion",
+      "tags": [
+        "bundle",
+        "upsell"
+      ],
+      "summary": "Frequently bought together / bundle products section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_buy-buttons",
+      "label": "Buy Buttons",
+      "category": "product-detail",
+      "tags": [
+        "cta",
+        "add-to-cart"
+      ],
+      "summary": "Add to cart and buy now buttons with optional quantity selector",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_clickable-discount",
+      "label": "Clickable Discount Badge",
+      "category": "conversion",
+      "tags": [
+        "discount"
+      ],
+      "summary": "Display discount code badge that auto-applies when clicked",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_custom-product-field",
+      "label": "Custom Product Field",
+      "category": "product-detail",
+      "tags": [
+        "personalization"
+      ],
+      "summary": "Add custom text input for personalization (engraving, gift message, etc.)",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_description",
+      "label": "Product Description",
+      "category": "product-detail",
+      "tags": [],
+      "summary": "Display full product description with formatting options",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_estimated-shipping",
+      "label": "Estimated Shipping",
+      "category": "product-detail",
+      "tags": [
+        "shipping",
+        "trust"
+      ],
+      "summary": "Show estimated delivery date and shipping calculator",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_inventory",
+      "label": "Inventory/Stock Status",
+      "category": "conversion",
+      "tags": [
+        "urgency",
+        "stock"
+      ],
+      "summary": "Display stock level and create urgency with low stock messages",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_price",
+      "label": "Product Price",
+      "category": "product-detail",
+      "tags": [],
+      "summary": "Display product price, compare at price, and sale price on product page",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_product-variant-picker-block",
+      "label": "Variant Picker",
+      "category": "product-detail",
+      "tags": [
+        "variants"
+      ],
+      "summary": "Allow customers to select product variants (size, color, style, etc.)",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_quantity-gifts",
+      "label": "Gifts on Quantity",
+      "category": "conversion",
+      "tags": [
+        "upsell"
+      ],
+      "summary": "Show free gift products unlocked at certain quantity thresholds",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_quantity-selector",
+      "label": "Quantity Selector",
+      "category": "product-detail",
+      "tags": [],
+      "summary": "Allow customers to select quantity with optional quantity breaks/discounts",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_share-button",
+      "label": "Share Buttons",
+      "category": "product-detail",
+      "tags": [
+        "social"
+      ],
+      "summary": "Social sharing buttons for product page",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_shipping-checkpoints",
+      "label": "Shipping Checkpoints",
+      "category": "trust-badges",
+      "tags": [
+        "shipping"
+      ],
+      "summary": "Display shipping benefits and trust signals with icons",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_sizing-chart",
+      "label": "Size Chart",
+      "category": "product-detail",
+      "tags": [
+        "sizing"
+      ],
+      "summary": "Display size chart popup for apparel and sizing information",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_sticky-atc",
+      "label": "Sticky Add to Cart",
+      "category": "conversion",
+      "tags": [
+        "cta"
+      ],
+      "summary": "Floating add to cart bar that appears when scrolling past buy buttons",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_subscription",
+      "label": "Subscription Widget",
+      "category": "conversion",
+      "tags": [
+        "subscription"
+      ],
+      "summary": "Offer subscription/recurring purchase option with discount",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_tabs",
+      "label": "Product Tabs",
+      "category": "product-detail",
+      "tags": [
+        "tabs"
+      ],
+      "summary": "Tabbed content sections for product information (descriptions, specs, reviews, etc)",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_title",
+      "label": "Product Title",
+      "category": "product-detail",
+      "tags": [],
+      "summary": "Display product title/name on product page",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "product_urgency",
+      "label": "Urgency Text",
+      "category": "conversion",
+      "tags": [
+        "urgency"
+      ],
+      "summary": "Display time-sensitive messages to create urgency and drive conversions",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "rating-stars",
+      "label": "Rating Stars",
+      "category": "trust-badges",
+      "tags": [
+        "rating",
+        "reviews"
+      ],
+      "summary": "Display star rating with optional count",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "row",
+      "label": "Row",
+      "category": "social-proof",
+      "tags": [
+        "stats",
+        "comparison"
+      ],
+      "summary": "Generic row block used in multiple sections with different field requirements",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "comparison-table",
+        "results"
+      ]
+    },
+    {
+      "id": "review-avatars",
+      "label": "Review Avatars",
+      "category": "social-proof",
+      "tags": [
+        "reviews"
+      ],
+      "summary": "Display customer avatars with review stats and text for social proof",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
+      "id": "slide",
+      "label": "Slide",
+      "category": "hero",
+      "tags": [],
+      "summary": "Individual slide in a slideshow with image and text",
+      "scope": "local",
+      "usedBySectionIds": [
+        "slideshow"
+      ]
+    },
+    {
+      "id": "tab",
+      "label": "Tab",
+      "category": "content",
+      "tags": [
+        "tabs"
+      ],
+      "summary": "Single tab with button, icon, and content area",
+      "scope": "local",
+      "usedBySectionIds": [
+        "content-tabs"
+      ]
+    },
+    {
+      "id": "text",
+      "label": "Text",
+      "category": "content",
+      "tags": [],
+      "summary": "Rich text content block",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "horizontal-ticker",
+        "image-with-text",
+        "main-product",
+        "rich-text",
+        "vertical-ticker"
+      ]
+    },
+    {
+      "id": "text-with-icon",
+      "label": "Text with Icon",
+      "category": "content",
+      "tags": [
+        "icons"
+      ],
+      "summary": "Text line with icon prefix",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "main-product"
+      ]
+    },
+    {
+      "id": "textarea",
+      "label": "Textarea Field",
+      "category": "form-input",
+      "tags": [],
+      "summary": "Multi-line text input field for forms",
+      "scope": "local",
+      "usedBySectionIds": [
+        "contact-form"
+      ]
+    },
+    {
+      "id": "tnc_checkbox",
+      "label": "Terms & Conditions Checkbox",
+      "category": "form-input",
+      "tags": [],
+      "summary": "Checkbox for accepting terms and conditions",
+      "scope": "local",
+      "usedBySectionIds": [
+        "contact-form"
+      ]
+    },
+    {
+      "id": "trustpilot-stars",
+      "label": "Trustpilot Stars",
+      "category": "trust-badges",
+      "tags": [
+        "rating",
+        "reviews"
+      ],
+      "summary": "Display Trustpilot rating stars",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "rich-text"
+      ]
+    },
+    {
+      "id": "video",
+      "label": "Video",
+      "category": "media",
+      "tags": [],
+      "summary": "Embed video content with cover image",
+      "scope": "standalone",
+      "usedBySectionIds": [
+        "custom-columns",
+        "horizontal-ticker",
+        "main-product"
+      ]
+    },
+    {
+      "id": "video_slide",
+      "label": "Video Slide",
+      "category": "media",
+      "tags": [
+        "slider",
+        "gallery"
+      ],
+      "summary": "A single video slide within an Image/Video Slider section",
+      "scope": "local",
+      "usedBySectionIds": [
+        "image-slider"
+      ]
+    }
+  ]
+}

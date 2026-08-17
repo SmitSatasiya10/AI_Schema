@@ -2,6 +2,11 @@
     "id": "testimonials",
     "label": "Testimonials",
     "purpose": "Customer reviews and testimonials slider",
+    "category": "social-proof",
+    "tags": [
+        "testimonial",
+        "reviews"
+    ],
     "allowed_on": [
         "index",
         "product",
@@ -49,6 +54,8 @@
             "false"
         ]
     },
-    "allowed_blocks": ["column"],
+    "allowed_blocks": [
+        "column"
+    ],
     "_notes": "Testimonials section should have at least 3 testimonial blocks for best appearance. Author field must be string only, no HTML tags allowed."
 }

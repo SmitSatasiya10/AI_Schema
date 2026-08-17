@@ -2,6 +2,10 @@
     "id": "contact-form",
     "label": "Contact Form",
     "purpose": "Contact form with customizable fields",
+    "category": "form-input",
+    "tags": [
+        "contact"
+    ],
     "allowed_on": [
         "page"
     ],
@@ -21,7 +25,7 @@
         ]
     },
     "allowed_blocks": [
-        "input_row",
+        "field_row",
         "textarea",
         "tnc_checkbox"
     ]

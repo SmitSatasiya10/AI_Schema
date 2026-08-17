@@ -2,6 +2,8 @@
     "id": "textarea",
     "label": "Textarea Field",
     "purpose": "Multi-line text input field for forms",
+    "category": "form-input",
+    "tags": [],
     "settings": {
         "label": "text",
         "required": [
