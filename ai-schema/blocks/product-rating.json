@@ -2,6 +2,11 @@
     "id": "product-rating",
     "label": "Product Rating",
     "purpose": "Display product rating and review count",
+    "category": "trust-badges",
+    "tags": [
+        "rating",
+        "reviews"
+    ],
     "settings": {
         "margin_top": {
             "type": "range",

@@ -2,20 +2,35 @@
     "id": "review-avatars",
     "label": "Review Avatars",
     "purpose": "Display customer avatars with review stats and text for social proof",
+    "category": "social-proof",
+    "tags": [
+        "reviews"
+    ],
     "settings": {
-        "visibility": ["desktop-hidden", "mobile-hidden", "always-display"],
+        "visibility": [
+            "desktop-hidden",
+            "mobile-hidden",
+            "always-display"
+        ],
         "enable_layout": {
             "type": "checkbox",
             "default": false
         },
-        "alignment": ["start", "center", "end"],
+        "alignment": [
+            "start",
+            "center",
+            "end"
+        ],
         "corner_radius": {
             "type": "range",
             "min": 0,
             "max": 40,
             "default": 30
         },
-        "avatars_position": ["left", "right"],
+        "avatars_position": [
+            "left",
+            "right"
+        ],
         "avatar_size": {
             "type": "range",
             "min": 20,

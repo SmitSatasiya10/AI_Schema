@@ -2,6 +2,10 @@
     "id": "product_share-button",
     "label": "Share Buttons",
     "purpose": "Social sharing buttons for product page",
+    "category": "product-detail",
+    "tags": [
+        "social"
+    ],
     "settings": {
         "share_label": {
             "type": "text",

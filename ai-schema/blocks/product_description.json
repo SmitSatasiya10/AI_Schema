@@ -2,6 +2,8 @@
     "id": "product_description",
     "label": "Product Description",
     "purpose": "Display full product description with formatting options",
+    "category": "product-detail",
+    "tags": [],
     "settings": {
         "show_full_description": {
             "type": "checkbox",

@@ -2,6 +2,10 @@
     "id": "custom-liquid",
     "label": "Custom Liquid",
     "purpose": "Custom Liquid code block for advanced customization",
+    "category": "misc",
+    "tags": [
+        "custom-code"
+    ],
     "settings": {
         "custom_liquid": "liquid"
     },

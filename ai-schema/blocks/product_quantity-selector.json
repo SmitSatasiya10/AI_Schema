@@ -2,6 +2,8 @@
     "id": "product_quantity-selector",
     "label": "Quantity Selector",
     "purpose": "Allow customers to select quantity with optional quantity breaks/discounts",
+    "category": "product-detail",
+    "tags": [],
     "settings": {
         "full_width_classic": {
             "type": "checkbox",

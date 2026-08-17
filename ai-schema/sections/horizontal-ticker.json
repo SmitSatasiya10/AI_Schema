@@ -2,6 +2,11 @@
     "id": "horizontal-ticker",
     "label": "Horizontal Ticker",
     "purpose": "Scrolling content ticker that moves horizontally with text, images, or videos",
+    "category": "trust-badges",
+    "tags": [
+        "ticker",
+        "certifications"
+    ],
     "allowed_on": [
         "index",
         "page",

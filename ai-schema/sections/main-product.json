@@ -2,6 +2,8 @@
     "id": "main-product",
     "label": "Main Product",
     "purpose": "Main product information section with all product blocks",
+    "category": "product-detail",
+    "tags": [],
     "template": "product",
     "allowed_on": [
         "product"

@@ -2,6 +2,10 @@
     "id": "media-slider",
     "label": "Media Slider",
     "purpose": "Slideshow of images or videos",
+    "category": "media",
+    "tags": [
+        "slider"
+    ],
     "settings": {
         "image_1": "image_picker",
         "image_2": "image_picker",

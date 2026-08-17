@@ -2,6 +2,10 @@
     "id": "product_product-variant-picker-block",
     "label": "Variant Picker",
     "purpose": "Allow customers to select product variants (size, color, style, etc.)",
+    "category": "product-detail",
+    "tags": [
+        "variants"
+    ],
     "settings": {
         "picker_types": {
             "type": "text",

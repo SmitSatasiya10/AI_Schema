@@ -2,6 +2,8 @@
     "id": "product",
     "label": "Product",
     "purpose": "Feature a product with optional secondary image on hover",
+    "category": "product-showcase",
+    "tags": [],
     "settings": {
         "product": "product_picker",
         "second_image": "checkbox"

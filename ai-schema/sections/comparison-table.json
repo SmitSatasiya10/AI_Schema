@@ -2,6 +2,11 @@
     "id": "comparison-table",
     "label": "Comparison Table",
     "purpose": "Product comparison table with features",
+    "category": "conversion",
+    "tags": [
+        "comparison",
+        "benefits"
+    ],
     "allowed_on": [
         "index",
         "product",

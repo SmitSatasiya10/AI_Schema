@@ -2,6 +2,8 @@
     "id": "tnc_checkbox",
     "label": "Terms & Conditions Checkbox",
     "purpose": "Checkbox for accepting terms and conditions",
+    "category": "form-input",
+    "tags": [],
     "settings": {
         "label": "richtext",
         "required": [

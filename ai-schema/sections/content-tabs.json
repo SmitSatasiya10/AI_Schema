@@ -2,6 +2,10 @@
     "id": "content-tabs",
     "label": "Content Tabs",
     "purpose": "Tabbed content with each tab containing rich content including images, text, videos",
+    "category": "content",
+    "tags": [
+        "tabs"
+    ],
     "allowed_on": [
         "index",
         "page",

@@ -2,6 +2,10 @@
     "id": "product_clickable-discount",
     "label": "Clickable Discount Badge",
     "purpose": "Display discount code badge that auto-applies when clicked",
+    "category": "conversion",
+    "tags": [
+        "discount"
+    ],
     "settings": {
         "discount_code": {
             "type": "text",

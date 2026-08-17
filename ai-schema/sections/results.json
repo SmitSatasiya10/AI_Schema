@@ -2,6 +2,10 @@
     "id": "results",
     "label": "Results",
     "purpose": "Display statistics and results with percentages",
+    "category": "social-proof",
+    "tags": [
+        "stats"
+    ],
     "allowed_on": [
         "index",
         "product",

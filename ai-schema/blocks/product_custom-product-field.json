@@ -2,6 +2,10 @@
     "id": "product_custom-product-field",
     "label": "Custom Product Field",
     "purpose": "Add custom text input for personalization (engraving, gift message, etc.)",
+    "category": "product-detail",
+    "tags": [
+        "personalization"
+    ],
     "settings": {
         "field_type": [
             "text",

@@ -2,6 +2,11 @@
     "id": "product_estimated-shipping",
     "label": "Estimated Shipping",
     "purpose": "Show estimated delivery date and shipping calculator",
+    "category": "product-detail",
+    "tags": [
+        "shipping",
+        "trust"
+    ],
     "settings": {
         "show_date_estimate": {
             "type": "checkbox",

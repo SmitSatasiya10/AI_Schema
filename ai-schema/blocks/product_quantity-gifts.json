@@ -2,6 +2,10 @@
     "id": "product_quantity-gifts",
     "label": "Gifts on Quantity",
     "purpose": "Show free gift products unlocked at certain quantity thresholds",
+    "category": "conversion",
+    "tags": [
+        "upsell"
+    ],
     "settings": {
         "border_thickness": {
             "type": "range",

@@ -8,6 +8,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 require('dotenv').config();
+const instrumentation = require('./instrumentation');
+const { retrieveRelevantSchemas } = require('./retrieval');
 
 // Configuration
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -16,12 +18,22 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'moonshotai/kimi-k2.5';
 const DEBUG = process.env.DEBUG === 'true';
 
 /**
- * Load all schema files from the ai-schema directory
+ * Load every schema file from disk (global + all sections + all blocks),
+ * unconditionally. This is the FULL_SCHEMA_MODE behavior that existed
+ * before Phase 2 and remains the default/fallback — see loadSchemas() below.
+ *
+ * File lists are sorted before reading so iteration order is deterministic
+ * across filesystems (fs.readdir() order is not guaranteed). This matters
+ * because at least one block id ("row") is currently defined by two files
+ * — result_row.json and row.json — and downstream code (validateOutput's
+ * blockMap, and this phase's capability index) resolves id collisions via
+ * "last one wins"; sorting makes that resolution reproducible instead of
+ * depending on OS/filesystem directory order. See PHASE2_REPORT.md "Known
+ * limitations" for the duplicate-id finding itself — it is not fixed here.
  */
-async function loadSchemas() {
+async function loadAllSchemasFromDisk() {
     const schemasDir = __dirname;
 
-    // Load global schema
     try {
         const globalSchema = JSON.parse(
             await fs.readFile(path.join(schemasDir, 'global.json'), 'utf8')
@@ -31,7 +43,7 @@ async function loadSchemas() {
         const sectionsDir = path.join(schemasDir, 'sections');
         let sectionSchemas = [];
         try {
-            const sectionFiles = await fs.readdir(sectionsDir);
+            const sectionFiles = (await fs.readdir(sectionsDir)).sort();
             sectionSchemas = await Promise.all(
                 sectionFiles
                     .filter(f => f.endsWith('.json'))
@@ -48,7 +60,7 @@ async function loadSchemas() {
         const blocksDir = path.join(schemasDir, 'blocks');
         let blockSchemas = [];
         try {
-            const blockFiles = await fs.readdir(blocksDir);
+            const blockFiles = (await fs.readdir(blocksDir)).sort();
             blockSchemas = await Promise.all(
                 blockFiles
                     .filter(f => f.endsWith('.json'))
@@ -70,6 +82,31 @@ async function loadSchemas() {
     } catch (error) {
         throw new Error(`Failed to load schemas: ${error.message}`);
     }
+}
+
+/**
+ * Load schemas for a generation request.
+ *
+ * Two modes, both built on loadAllSchemasFromDisk():
+ *   - loadSchemas() / loadSchemas({}) — FULL_SCHEMA_MODE (unchanged default
+ *     behavior from before Phase 2: every section/block schema on disk).
+ *   - loadSchemas({ retrieval: { userPrompt, templateName, requestId } }) —
+ *     RETRIEVAL_MODE: deterministically selects the relevant subset via
+ *     retrieval.js, falling back to the full set internally if retrieval
+ *     can't produce a usable candidate pool (see retrieval.js for when).
+ *
+ * The zero-arg call remains byte-for-byte identical to Phase 1's behavior —
+ * same return shape, same content — so existing callers and the Phase 1
+ * regression suite are unaffected.
+ */
+async function loadSchemas(options = {}) {
+    const fullSchemas = await loadAllSchemasFromDisk();
+
+    if (!options.retrieval) {
+        return fullSchemas;
+    }
+
+    return retrieveRelevantSchemas(fullSchemas, options.retrieval);
 }
 
 /**
@@ -189,7 +226,7 @@ IMPORTANT: The order array should contain AT MOST 10 sections for optimal homepa
 /**
  * Make an AI request to OpenRouter with retry logic
  */
-async function makeAIRequest(userPrompt, systemPrompt, maxRetries = 3) {
+async function makeAIRequest(userPrompt, systemPrompt, maxRetries = 3, context = {}) {
     if (!OPENROUTER_API_KEY) {
         throw new Error('OPENROUTER_API_KEY not set in environment. Please set it in .env file');
     }
@@ -197,6 +234,10 @@ async function makeAIRequest(userPrompt, systemPrompt, maxRetries = 3) {
     if (!userPrompt || typeof userPrompt !== 'string') {
         throw new Error('Invalid user prompt: must be a non-empty string');
     }
+
+    const { requestId = instrumentation.nextRequestId('gen'), callType = 'main_generation' } = context;
+    const startTime = Date.now();
+    const promptChars = (systemPrompt ? systemPrompt.length : 0) + userPrompt.length;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -243,9 +284,33 @@ async function makeAIRequest(userPrompt, systemPrompt, maxRetries = 3) {
                 throw new Error('Invalid API response format: missing choices or message');
             }
 
-            return data.choices[0].message.content;
+            const content = data.choices[0].message.content;
+            instrumentation.logAICall({
+                requestId,
+                callType,
+                model: OPENROUTER_MODEL,
+                promptChars,
+                outputChars: content ? content.length : 0,
+                durationMs: Date.now() - startTime,
+                retryCount: attempt - 1,
+                attempts: attempt,
+                success: true
+            });
+            return content;
         } catch (error) {
             if (attempt === maxRetries) {
+                instrumentation.logAICall({
+                    requestId,
+                    callType,
+                    model: OPENROUTER_MODEL,
+                    promptChars,
+                    outputChars: 0,
+                    durationMs: Date.now() - startTime,
+                    retryCount: attempt - 1,
+                    attempts: attempt,
+                    success: false,
+                    error: error.message
+                });
                 throw error;
             }
             const delay = Math.pow(2, attempt) * 1000;
@@ -258,7 +323,8 @@ async function makeAIRequest(userPrompt, systemPrompt, maxRetries = 3) {
 /**
  * Validate AI output against schemas (comprehensive validation)
  */
-function validateOutput(output, schemas) {
+function validateOutput(output, schemas, context = {}) {
+    const { requestId = instrumentation.nextRequestId('val') } = context;
     try {
         if (!output || typeof output !== 'string') {
             throw new Error('Invalid output: must be a non-empty string');
@@ -290,6 +356,7 @@ function validateOutput(output, schemas) {
 
         const errors = [];
         const warnings = [];
+        let totalBlockCount = 0;
 
         // Validate each section
         for (const [sectionId, section] of Object.entries(config.sections)) {
@@ -327,7 +394,8 @@ function validateOutput(output, schemas) {
             // Validate blocks if section has blocks
             if (section.blocks && typeof section.blocks === 'object') {
                 const blockIds = Object.keys(section.blocks);
-                
+                totalBlockCount += blockIds.length;
+
                 // Check max_blocks limit
                 if (sectionSchema.max_blocks && blockIds.length > sectionSchema.max_blocks) {
                     errors.push(`Section "${sectionId}" (type: "${section.type}"): has ${blockIds.length} blocks but maximum allowed is ${sectionSchema.max_blocks}`);
@@ -417,11 +485,34 @@ function validateOutput(output, schemas) {
         }
 
         if (errors.length > 0) {
+            instrumentation.logValidation({
+                requestId,
+                valid: false,
+                errorCount: errors.length,
+                warningCount: warnings.length,
+                sectionCount: config.order.length,
+                blockCount: totalBlockCount,
+                error: errors.join('; ')
+            });
             return { valid: false, error: errors.join('; '), warnings };
         }
 
+        instrumentation.logValidation({
+            requestId,
+            valid: true,
+            errorCount: 0,
+            warningCount: warnings.length,
+            sectionCount: config.order.length,
+            blockCount: totalBlockCount
+        });
         return { valid: true, config, warnings };
     } catch (error) {
+        instrumentation.logValidation({
+            requestId,
+            valid: false,
+            errorCount: 1,
+            error: error.message
+        });
         return { valid: false, error: error.message };
     }
 }
@@ -489,7 +580,10 @@ const COLOR_PALETTES = {
 /**
  * Ask AI to suggest custom color palette based on user prompt
  */
-async function generateAIColorPalette(userPrompt, maxRetries = 2) {
+async function generateAIColorPalette(userPrompt, maxRetries = 2, context = {}) {
+    const { requestId = instrumentation.nextRequestId('color'), callType = 'color_palette' } = context;
+    const startTime = Date.now();
+
     if (!OPENROUTER_API_KEY) {
         if (DEBUG) console.log('⚠️  No OPENROUTER_API_KEY, skipping AI color generation');
         return null;
@@ -543,26 +637,41 @@ IMPORTANT:
         if (!response.ok) {
             const error = await response.text();
             console.warn(`⚠️  Color generation API error: ${error}`);
+            instrumentation.logAICall({
+                requestId, callType, model: OPENROUTER_MODEL,
+                promptChars: userPrompt.length, outputChars: 0,
+                durationMs: Date.now() - startTime, success: false, error
+            });
             return null;
         }
 
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content;
-        
+
         if (!content) {
             console.warn('⚠️  No content in AI color response');
+            instrumentation.logAICall({
+                requestId, callType, model: OPENROUTER_MODEL,
+                promptChars: userPrompt.length, outputChars: 0,
+                durationMs: Date.now() - startTime, success: false, error: 'No content in AI color response'
+            });
             return null;
         }
-        
+
         if (DEBUG) {
             console.log('🔍 Raw AI color response:', content.substring(0, 200));
         }
-        
+
         const colorPalette = JSON.parse(content);
 
         // Validate that we got the required color fields
         if (!colorPalette.colors_accent_1 || !colorPalette.colors_accent_2) {
             console.warn('⚠️  AI color palette missing required fields, using fallback');
+            instrumentation.logAICall({
+                requestId, callType, model: OPENROUTER_MODEL,
+                promptChars: userPrompt.length, outputChars: content.length,
+                durationMs: Date.now() - startTime, success: false, error: 'AI color palette missing required fields'
+            });
             return null;
         }
 
@@ -573,9 +682,19 @@ IMPORTANT:
             console.log(`   Reason: ${colorPalette.description || 'N/A'}`);
         }
 
+        instrumentation.logAICall({
+            requestId, callType, model: OPENROUTER_MODEL,
+            promptChars: userPrompt.length, outputChars: content.length,
+            durationMs: Date.now() - startTime, success: true
+        });
         return colorPalette;
     } catch (error) {
         console.warn(`⚠️  AI color generation failed: ${error.message}`);
+        instrumentation.logAICall({
+            requestId, callType, model: OPENROUTER_MODEL,
+            promptChars: userPrompt.length, outputChars: 0,
+            durationMs: Date.now() - startTime, success: false, error: error.message
+        });
         return null;
     }
 }

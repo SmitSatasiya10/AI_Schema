@@ -2,6 +2,8 @@
     "id": "product_price",
     "label": "Product Price",
     "purpose": "Display product price, compare at price, and sale price on product page",
+    "category": "product-detail",
+    "tags": [],
     "settings": {
         "price_layout": [
             "price-first",

@@ -2,6 +2,8 @@
     "id": "video",
     "label": "Video",
     "purpose": "Embed video content with cover image",
+    "category": "media",
+    "tags": [],
     "settings": {
         "cover_image": "image_picker",
         "video_url": "video_url",

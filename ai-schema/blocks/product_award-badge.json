@@ -2,6 +2,11 @@
     "id": "product_award-badge",
     "label": "Award Badge",
     "purpose": "Display trust badges, awards, certifications above the fold",
+    "category": "trust-badges",
+    "tags": [
+        "awards",
+        "certifications"
+    ],
     "settings": {
         "badge_text": {
             "type": "text",

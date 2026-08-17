@@ -2,6 +2,10 @@
     "id": "payment-badges",
     "label": "Payment Badges",
     "purpose": "Display accepted payment method icons",
+    "category": "trust-badges",
+    "tags": [
+        "payment"
+    ],
     "settings": {
         "show_payment_icons": "checkbox",
         "payment_icon_style": [

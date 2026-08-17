@@ -2,6 +2,11 @@
     "id": "collage",
     "label": "Collage",
     "purpose": "Display a collage of images and products in various layouts",
+    "category": "content",
+    "tags": [
+        "visual",
+        "product"
+    ],
     "allowed_on": [
         "index",
         "page",

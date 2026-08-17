@@ -2,6 +2,10 @@
     "id": "vertical-ticker",
     "label": "Vertical Ticker",
     "purpose": "Scrolling text ticker that moves vertically",
+    "category": "content",
+    "tags": [
+        "ticker"
+    ],
     "allowed_on": [
         "index",
         "page",

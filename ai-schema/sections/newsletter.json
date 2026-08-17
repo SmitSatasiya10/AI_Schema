@@ -2,6 +2,10 @@
     "id": "newsletter",
     "label": "Email Signup",
     "purpose": "Newsletter subscription form",
+    "category": "form-input",
+    "tags": [
+        "newsletter"
+    ],
     "allowed_on": [
         "index",
         "product",

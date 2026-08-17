@@ -2,6 +2,11 @@
     "id": "product_bundle-offer",
     "label": "Bundle Offer",
     "purpose": "Frequently bought together / bundle products section",
+    "category": "conversion",
+    "tags": [
+        "bundle",
+        "upsell"
+    ],
     "settings": {
         "heading": {
             "type": "text",

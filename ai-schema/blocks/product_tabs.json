@@ -2,8 +2,16 @@
     "id": "product_tabs",
     "label": "Product Tabs",
     "purpose": "Tabbed content sections for product information (descriptions, specs, reviews, etc)",
+    "category": "product-detail",
+    "tags": [
+        "tabs"
+    ],
     "settings": {
-        "visibility": ["desktop-hidden", "mobile-hidden", "always-display"],
+        "visibility": [
+            "desktop-hidden",
+            "mobile-hidden",
+            "always-display"
+        ],
         "tab_text_size": {
             "type": "range",
             "min": 8,
@@ -16,7 +24,10 @@
             "max": 20,
             "default": 14
         },
-        "button_alignment": ["left", "center"],
+        "button_alignment": [
+            "left",
+            "center"
+        ],
         "divider_thickness": {
             "type": "range",
             "min": 1,
@@ -53,7 +64,15 @@
             "name": "Tab",
             "settings": {
                 "title": "text",
-                "icon": ["none", "package", "info", "star", "checkmark", "return", "truck"],
+                "icon": [
+                    "none",
+                    "package",
+                    "info",
+                    "star",
+                    "checkmark",
+                    "return",
+                    "truck"
+                ],
                 "content": "richtext"
             }
         }

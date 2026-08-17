@@ -2,6 +2,8 @@
     "id": "heading",
     "label": "Heading",
     "purpose": "Text heading block",
+    "category": "content",
+    "tags": [],
     "settings": {
         "title": "inline_richtext",
         "heading_size": [

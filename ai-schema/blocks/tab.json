@@ -2,6 +2,10 @@
     "id": "tab",
     "label": "Tab",
     "purpose": "Single tab with button, icon, and content area",
+    "category": "content",
+    "tags": [
+        "tabs"
+    ],
     "_notes": "The 'text' field MUST be wrapped with <p> tags. Example: '<p>Tab content</p>'. btn_icon uses Material Symbols names.",
     "settings": {
         "title": "inline_richtext",

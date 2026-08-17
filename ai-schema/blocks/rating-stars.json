@@ -2,6 +2,11 @@
     "id": "rating-stars",
     "label": "Rating Stars",
     "purpose": "Display star rating with optional count",
+    "category": "trust-badges",
+    "tags": [
+        "rating",
+        "reviews"
+    ],
     "settings": {
         "rating": {
             "type": "range",
