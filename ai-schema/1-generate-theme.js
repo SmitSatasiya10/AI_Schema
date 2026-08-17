@@ -30,6 +30,7 @@ const { runStagedGeneration } = require('./generation');
 const { validateCandidate, validateThemeCompatibility } = require('./validation');
 const { mergeThemeState } = require('./merge');
 const { applyThemeState } = require('./apply');
+const { generateAndApplyFooter } = require('./footer-generation');
 
 const DEBUG = process.env.DEBUG === 'true';
 
@@ -201,6 +202,29 @@ async function runFullPipeline(userPrompt, options = {}) {
             console.log(`✅ Staged generation complete — ${staged.retrievalMeta.mode}, ${staged.plan.order.length} sections (plan repaired: ${staged.planRepaired}, config repaired: ${staged.configRepaired})\n`);
 
             validation = { valid: true, config: staged.config, warnings: staged.warnings || [] };
+
+            // Footer bundling: every homepage generation also regenerates
+            // the footer's block content (link headings, newsletter copy)
+            // to match, reusing the SAME resolved brief and ThemeState —
+            // no second clarification call. Writes directly via merge/apply
+            // regardless of this run's own mergeApplyMode choice (the only
+            // viable write path for a sections/*.json file — see
+            // footer-generation.js). A failure here must not undo the
+            // homepage generation that already succeeded above.
+            if (templateName === 'index' && autoCopy) {
+                console.log('🦶 STEP 4c: Regenerating footer content...');
+                try {
+                    const footerResult = await generateAndApplyFooter({ brief: resolvedBrief, schemas, themeState, themeRoot, requestId });
+                    aiCallCount += footerResult.aiCallCount;
+                    if (footerResult.applied) {
+                        console.log(`✅ Footer updated (${footerResult.linkListCount} link list(s), existing menu assignments preserved)\n`);
+                    } else {
+                        console.log(`ℹ️  Footer not updated: ${footerResult.reason}\n`);
+                    }
+                } catch (footerError) {
+                    console.warn(`⚠️  Footer generation failed, homepage generation is unaffected: ${footerError.message}\n`);
+                }
+            }
         } else {
             // STEP 4: AI Configuration (legacy single-call path)
             console.log('🤖 STEP 4: Requesting AI-generated configuration...');
@@ -394,7 +418,14 @@ function parseArgs() {
         retrievalMode: process.env.RETRIEVAL_MODE === 'true',
         understandingMode: process.env.UNDERSTANDING_MODE === 'true',
         sessionId: null,
-        stagedMode: process.env.STAGED_MODE === 'true',
+        // CLI default flipped: staged generation (AI chooses sections/blocks
+        // from the full template-eligible name list, see generation.js) is
+        // now on unless explicitly disabled via --no-staged or
+        // STAGED_MODE=false. runFullPipeline()'s OWN internal default
+        // (line ~66 above) is intentionally left untouched — that's what
+        // test/phase5Regression.test.js's "byte-identical to before Phase 5"
+        // case pins for direct/programmatic callers that pass no options.
+        stagedMode: process.env.STAGED_MODE !== 'false',
         mergeApplyMode: process.env.MERGE_APPLY_MODE === 'true',
         dryRunApply: false
     };
@@ -465,15 +496,17 @@ Options:
   --session ID            Resume a previous clarification session (the
                           session ID is printed when clarification pauses).
                           Only meaningful together with --understanding.
-  --staged                Use Phase 5 staged generation (plan → configure)
-                          instead of the single-mega-prompt path (opt-in;
-                          same effect as STAGED_MODE=true). Implies
-                          --understanding — staged generation requires a
-                          resolved WebsiteBrief. Reads the current ThemeState
+  --staged                Use Phase 5 staged generation (AI plans structure
+                          from the full template-eligible section/block name
+                          list, then configures only what it picked) instead
+                          of the single-mega-prompt path. DEFAULT as of this
+                          CLI unless disabled below. Implies --understanding
+                          — staged generation requires a resolved
+                          WebsiteBrief. Reads the current ThemeState
                           read-only for context; never writes to the live
                           theme itself (that's still gated by --no-copy).
-  --no-staged             Force the pre-Phase-5 single-call generation path
-                          even if STAGED_MODE=true is set in the environment.
+  --no-staged             Force the legacy single-call, full-schema-dump
+                          generation path (same effect as STAGED_MODE=false).
   --merge-apply           Use Phase 7 deterministic merge/apply (merge.js/
                           apply.js) instead of the legacy full-overwrite/
                           mergeProductTemplate() copy step (opt-in; same

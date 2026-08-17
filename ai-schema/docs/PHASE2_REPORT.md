@@ -176,6 +176,7 @@ Full machine-readable output in `PHASE2_MEASUREMENTS.json` (regenerate any time 
 - **`main-product.json` references 8 block ids with no matching schema file** — pre-existing, discovered while implementing transitive block retrieval, not fixed (see "Schema changes").
 - **Adding `category`/`tags` metadata increased the full-load baseline by ~7.6%** (59,702 → 64,260 chars) — a real, honestly-reported cost of Phase 2 to the fallback path specifically, more than offset by retrieval-mode's 35-52% reductions on the paths that don't fall back.
 - **Retrieval is opt-in, not yet the default** — `runFullPipeline()` still defaults to `FULL_SCHEMA_MODE` unless `retrievalMode: true` is passed or `RETRIEVAL_MODE=true` is set. Per spec §20, making retrieval the default is a deliberate future decision point, not assumed here.
+  - **Update (2026-08-17):** that decision point was resolved, but not in `retrieval.js`'s favor — its keyword-matching selection doesn't generalize to niches `retrieval-rules.json` didn't anticipate. Prompt-size reduction is now handled by Phase 5 staged generation instead (see `PHASE5_REPORT.md`), which is on by default at the CLI and interactive-menu entry points as of this date and lets the AI itself choose sections/blocks from the full template-eligible name list. `retrieveRelevantSchemas()` here is unchanged and still reachable via `--retrieval` on the legacy single-call path, but is no longer the intended fix for prompt size.
 
 ---
 

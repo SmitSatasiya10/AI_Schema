@@ -52,6 +52,13 @@ const { applyThemeState } = require('./apply');
 const CREATE_SIGNAL_PHRASES = ['create a', 'create an', 'build a', 'build me', 'design a', 'generate a', 'make me a store', 'make a store', 'make a homepage', 'redesign', 'entire store', 'whole store', 'entire homepage'];
 const EDIT_VERBS = ['change', 'update', 'remove', 'delete', 'add', 'move', 'replace', 'edit', 'modify', 'set'];
 
+// A request only has a legitimate reason to target NO existing section when
+// it's asking to CREATE one — everything else (update/remove/a vague "change
+// one section" with no section named) needs an existing target, so a
+// NOT_FOUND resolution there must ask which section rather than let the AI
+// guess an operation with zero grounding.
+const ADD_SIGNAL_VERBS = ['add', 'create', 'insert', 'new'];
+
 function classifyRequest(userPrompt) {
     const lower = (userPrompt || '').toLowerCase();
     if (CREATE_SIGNAL_PHRASES.some(phrase => lower.includes(phrase))) {
@@ -206,6 +213,33 @@ async function runTargetedEdit(userPrompt, options = {}) {
         };
         instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, durationMs: Date.now() - startTime });
         return result;
+    }
+
+    // §10/§29 — NOT_FOUND means no existing section matched at all. When the
+    // template exists but nothing in it matched (a vague "change one
+    // section" that names no section), there's no target to propose an
+    // operation against, so ask which section instead of sending an
+    // ungrounded AI call that can only guess. This does NOT apply when the
+    // template itself isn't present in the ThemeState at all — that's the
+    // legitimate shape of a global-settings-only request (no section is
+    // ever the target for update_global_settings), which must still reach
+    // the AI proposal below.
+    const targetTemplate = themeState.templates[templateName];
+    if (sectionTarget.status === 'NOT_FOUND' && targetTemplate) {
+        const looksLikeAdd = ADD_SIGNAL_VERBS.some(verb => new RegExp(`\\b${verb}\\b`, 'i').test(userPrompt));
+        if (!looksLikeAdd) {
+            const availableSections = Object.entries(targetTemplate.raw.sections || {}).map(([sectionId, section]) => ({ sectionId, type: section.type }));
+            const result = {
+                status: 'NEEDS_CLARIFICATION',
+                classification,
+                targetStatus: sectionTarget.status,
+                templateName,
+                candidates: availableSections,
+                questions: [buildAmbiguityQuestion(availableSections, 'section')]
+            };
+            instrumentation.logEditPipeline({ requestId, status: result.status, classification, targetStatus: sectionTarget.status, durationMs: Date.now() - startTime });
+            return result;
+        }
     }
 
     let targetContext = null;

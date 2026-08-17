@@ -182,10 +182,14 @@ test.before(async () => {
 
 test('buildCoverageReport() — real repo: reflects Phase 11\'s actual coverage improvement', () => {
     assert.strictEqual(report.summary.realSectionCount, 86);
-    assert.strictEqual(report.summary.aiSectionCount, 26);
-    assert.strictEqual(report.summary.supportedSectionCount, 26, 'every AI section schema must correspond to a real Liquid file');
+    // 27: footer coverage added "footer" (sections/footer.liquid is real).
+    assert.strictEqual(report.summary.aiSectionCount, 27);
+    assert.strictEqual(report.summary.supportedSectionCount, 27, 'every AI section schema must correspond to a real Liquid file');
     assert.strictEqual(report.summary.realBlockCount, 80);
-    assert.strictEqual(report.summary.aiBlockCount, 57);
+    // 59: footer coverage added "link_list" and "email_signup" (both real,
+    // as inline block identities declared inside sections/footer.liquid's
+    // own schema, not standalone .liquid files — see supportedBlockCount).
+    assert.strictEqual(report.summary.aiBlockCount, 59);
     // Denominator includes inline-only block types (declared inside a real
     // section's own schema, no standalone .liquid file — e.g. "hotspot"),
     // which is larger than the standalone-file count alone.

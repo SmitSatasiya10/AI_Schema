@@ -8,13 +8,18 @@
  *   WebsiteBrief (Phase 3) + ThemeState context (Phase 4, bounded)
  *        │
  *        ▼
- *   Deterministic retrieval (Phase 2, reused unchanged — no LLM call to
- *   pick schemas)
+ *   Template-eligibility filter (retrieval.js's getTemplateEligibleSchemas —
+ *   hard constraints only: allowed_on + forced-exclusive-section rules, no
+ *   keyword-based relevance guessing, no LLM call). Falls back to the full
+ *   catalog only when zero sections declare the template eligible at all.
  *        │
  *        ▼
- *   Stage 1 — PLANNING: decide which existing section/block types to use,
- *   in what order and composition. No settings, no content. Validated
- *   against the retrieved candidate set (never the whole catalog) before
+ *   Stage 1 — PLANNING: the AI itself decides which existing section/block
+ *   types to use, in what order and composition, from the FULL
+ *   template-eligible name list (not a keyword-narrowed subset) — this is
+ *   what lets it generalize to niches/requests retrieval-rules.json never
+ *   anticipated. No settings, no content yet. Validated against the
+ *   eligible candidate set (never an arbitrary invented type) before
  *   Stage 2 is allowed to run at all.
  *        │
  *        ▼
@@ -34,7 +39,7 @@
 
 const instrumentation = require('./instrumentation');
 const { buildCapabilityIndex } = require('./capability-index');
-const { retrieveRelevantSchemas, FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE, isEligibleForTemplate } = require('./retrieval');
+const { getTemplateEligibleSchemas, FORCED_EXCLUSIVE_SECTION_BY_TEMPLATE, isEligibleForTemplate } = require('./retrieval');
 const { makeAIRequest, validateOutput } = require('./example-implementation');
 const { briefToSummaryText } = require('./brief');
 const { selectGenerationContext } = require('./theme-state');
@@ -48,12 +53,35 @@ const MAX_PLAN_SECTIONS = 10; // same homepage ceiling validateOutput() already 
 // the specific types the plan actually uses).
 // ---------------------------------------------------------------------------
 
+// Shared by lightweightCapabilityListing() (tells the planner which block
+// ids a section accepts) and validateGenerationPlan() (checks a proposed
+// block id against that same list) — a single source of truth so the
+// planning prompt's constraint can never drift from what's actually
+// enforced. allowed_blocks is schema data, either an array of ids or an
+// object keyed by id (both forms occur in the schema catalog).
+function getAllowedBlockIds(sectionSchema) {
+    return Array.isArray(sectionSchema.allowed_blocks)
+        ? sectionSchema.allowed_blocks
+        : (sectionSchema.allowed_blocks && typeof sectionSchema.allowed_blocks === 'object'
+            ? Object.keys(sectionSchema.allowed_blocks)
+            : []);
+}
+
 function lightweightCapabilityListing(retrievedSchemas) {
     const index = buildCapabilityIndex(retrievedSchemas);
+    const sectionSchemaById = new Map(retrievedSchemas.sectionSchemas.map(s => [s.id, s]));
     return {
         sections: index.sections.map(s => ({
             id: s.id, label: s.label, summary: s.summary,
-            hasBlocks: s.hasBlocks, allowedBlockCount: s.allowedBlockCount, maxBlocks: s.maxBlocks
+            hasBlocks: s.hasBlocks, maxBlocks: s.maxBlocks,
+            // The exact block ids THIS section accepts — not just a count.
+            // Without this, the planner previously had no way to actually
+            // know which blocks fit which section (only a global block
+            // list + a per-section count) and had to guess from labels
+            // alone, which is what produced schema-invalid plans that
+            // survived even a repair attempt (e.g. proposing "text-with-icon"
+            // inside "email-signup-banner").
+            allowedBlockTypes: getAllowedBlockIds(sectionSchemaById.get(s.id) || {})
         })),
         blocks: index.blocks.map(b => ({ id: b.id, label: b.label, summary: b.summary }))
     };
@@ -71,7 +99,7 @@ function buildPlanningSystemPrompt(templateName, capabilityListing, themeContext
 CRITICAL RULES:
 1. You may ONLY use section types listed in AVAILABLE SECTIONS below, and block types listed in AVAILABLE BLOCKS below — copy each "id" value VERBATIM (exact spelling, exact hyphens/underscores).
 2. Do NOT invent a section or block type that isn't listed. If nothing listed fits a need, omit it — do not approximate with a made-up type.
-3. Only include block types that make sense for the section they're placed in.
+3. Each entry in AVAILABLE SECTIONS has its own "allowedBlockTypes" array — this is the COMPLETE and ONLY set of block ids that section accepts. A block type that "sounds like" it would fit (e.g. a generic "buttons"/"text-with-icon" block) is INVALID unless it literally appears in that specific section's "allowedBlockTypes". Never reuse a block id from one section's list inside a different section unless that section's own "allowedBlockTypes" also contains it.
 `;
 
     if (forcedSectionId) {
@@ -178,9 +206,7 @@ function validateGenerationPlan(plan, retrievedSchemas, templateName) {
         const blockTypes = Array.isArray(section.blockTypes) ? section.blockTypes : [];
         if (blockTypes.length === 0) continue;
 
-        const allowedBlocksList = Array.isArray(sectionSchema.allowed_blocks)
-            ? sectionSchema.allowed_blocks
-            : (sectionSchema.allowed_blocks && typeof sectionSchema.allowed_blocks === 'object' ? Object.keys(sectionSchema.allowed_blocks) : []);
+        const allowedBlocksList = getAllowedBlockIds(sectionSchema);
 
         if (sectionSchema.max_blocks && blockTypes.length > sectionSchema.max_blocks) {
             errors.push(`plan.sections["${id}"] has ${blockTypes.length} blocks but "${section.type}" allows at most ${sectionSchema.max_blocks}`);
@@ -447,9 +473,10 @@ async function runStagedGeneration(options = {}) {
 
     const startTime = Date.now();
 
-    // §24 — retrieval driven by the structured brief, not raw prompt wording.
-    const retrievalText = briefToSummaryText(brief);
-    const retrieved = retrieveRelevantSchemas(schemas, { userPrompt: retrievalText, templateName, requestId });
+    // Hard-constraint-only eligibility filter — the AI itself chooses which
+    // of the eligible sections/blocks to use in Stage 1, not a keyword
+    // matcher (see file header).
+    const retrieved = getTemplateEligibleSchemas(schemas, templateName, requestId);
 
     // §7/§25 — bounded, deterministic ThemeState slice; never the whole state.
     const themeContext = themeState

@@ -181,8 +181,8 @@ test('runFullPipeline() default (no retrievalMode option) — still uses FULL_SC
         const pipelineLog = capturedLogs.find(l => typeof l === 'string' && l.startsWith('[PIPELINE]'));
         const payload = JSON.parse(pipelineLog.replace('[PIPELINE] ', ''));
         assert.strictEqual(payload.retrievalMode, 'FULL_SCHEMA_MODE');
-        assert.strictEqual(payload.sectionSchemaCount, 26, 'default behavior should still load all 26 section schemas (Phase 11 added 10)');
-        assert.strictEqual(payload.blockSchemaCount, 57, 'default behavior should still load all 57 block schemas (result_row.json was merged into row.json and deleted, resolving the former "row" duplicate id)');
+        assert.strictEqual(payload.sectionSchemaCount, 27, 'default behavior should still load every section schema (footer coverage added "footer")');
+        assert.strictEqual(payload.blockSchemaCount, 59, 'default behavior should still load every block schema (footer coverage added "link_list" and "email_signup")');
     } finally {
         global.fetch = originalFetch;
         process.exit = originalExit;

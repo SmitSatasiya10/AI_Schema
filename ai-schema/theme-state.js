@@ -83,6 +83,43 @@ async function listTemplateFiles(themeRoot) {
     return { found, skipped };
 }
 
+// Shopify OS 2.0 "section group" files (header-group.json, footer-group.json)
+// live directly under sections/, not templates/, but are structurally
+// identical ({sections, order}) — see footer.json's ai-schema coverage for
+// why footer-group needs this. Locale-variant files (e.g.
+// footer-group.context.international.json) are excluded: they're
+// Shopify-managed per-locale overrides, not a separate group to represent
+// here. Folded into the same `templates` map as listTemplateFiles() (keyed
+// by filename stem, e.g. "footer-group") so merge.js/apply.js — which are
+// already sourceFile-driven, not templates/-prefix-driven — need no changes
+// to read/write them.
+async function listSectionGroupFiles(themeRoot) {
+    const sectionsDir = path.join(themeRoot, 'sections');
+    const found = [];
+
+    let entries;
+    try {
+        entries = await fs.readdir(sectionsDir, { withFileTypes: true });
+    } catch (error) {
+        if (error.code === 'ENOENT') return { found };
+        throw error;
+    }
+
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+        if (!entry.isFile() || !entry.name.endsWith('-group.json')) continue;
+        if (entry.name.includes('.context.')) continue; // locale-variant override, not a group of its own
+
+        const name = entry.name.replace(/\.json$/, '');
+        found.push({
+            name,
+            absolutePath: path.join(sectionsDir, entry.name),
+            sourceFile: path.posix.join('sections', entry.name)
+        });
+    }
+
+    return { found };
+}
+
 async function readJSONSafe(absolutePath) {
     try {
         const raw = await fs.readFile(absolutePath, 'utf8');
@@ -171,11 +208,12 @@ async function buildThemeState(options = {}) {
     const knownBlockTypes = new Set(resolvedSchemas.blockSchemas.map(b => b.id));
 
     const { found: templateFiles, skipped: unsupportedTemplateFiles } = await listTemplateFiles(themeRoot);
+    const { found: sectionGroupFiles } = await listSectionGroupFiles(themeRoot);
 
     const templates = {};
     const unparseableTemplates = [];
 
-    for (const file of templateFiles) {
+    for (const file of [...templateFiles, ...sectionGroupFiles]) {
         const result = await readJSONSafe(file.absolutePath);
         if (!result.ok) {
             unparseableTemplates.push({ name: file.name, sourceFile: file.sourceFile, error: result.error });
@@ -427,5 +465,6 @@ module.exports = {
     selectGenerationContext,
     // exported for direct/unit testing without a full buildThemeState() run
     listTemplateFiles,
+    listSectionGroupFiles,
     classifyTemplate
 };

@@ -7,7 +7,6 @@
 
 const readline = require('readline');
 const { runFullPipeline } = require('./1-generate-theme');
-const { understandRequest } = require('./clarification');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -40,9 +39,10 @@ async function showMenu() {
     console.log('  5️⃣  Custom description with AI clarification (homepage)');
     console.log('  6️⃣  View documentation');
     console.log('  7️⃣  Just copy existing files');
-    console.log('  8️⃣  Exit\n');
+    console.log('  8️⃣  Edit an existing section');
+    console.log('  9️⃣  Exit\n');
 
-    const choice = await prompt('Select option (1-8): ');
+    const choice = await prompt('Select option (1-9): ');
     return choice.trim();
 }
 
@@ -202,6 +202,171 @@ function resolveNicheTemplatePrompt(templatePrompt, customInput) {
 }
 
 /**
+ * Runs generation through the staged (AI-chooses-sections) pipeline,
+ * driving runFullPipeline()'s own Phase 3 clarification loop when a
+ * request is too vague to plan from — questions are printed, the answer is
+ * fed back in under the same session, and this repeats until READY.
+ * Bounded automatically by clarification.js's MAX_CLARIFICATION_ROUNDS (2):
+ * status is forced to READY after that many rounds, so this always
+ * terminates.
+ */
+async function runStagedPipeline(initialPrompt, pipelineOptions) {
+    let userInput = initialPrompt;
+    let sessionId = null;
+    while (true) {
+        const result = await runFullPipeline(userInput, { ...pipelineOptions, stagedMode: true, sessionId });
+        if (result.status !== 'NEEDS_CLARIFICATION') return result;
+        console.log('\n❓ A few quick questions before we generate your store:\n');
+        result.questions.forEach((q, i) => console.log(`   ${i + 1}. ${q}`));
+        userInput = await prompt('\n> ');
+        sessionId = result.sessionId;
+    }
+}
+
+// Maps a keyword found in the user's edit request to the ThemeState
+// template key it actually lives in (e.g. sections/footer-group.json is
+// keyed "footer-group", not "footer"). Checked longest-keyword-first so
+// "header" doesn't shadow a more specific future entry.
+const TEMPLATE_KEYWORD_ALIASES = {
+    footer: 'footer-group',
+    header: 'header-group',
+    'list-collections': 'list-collections',
+    collection: 'collection',
+    product: 'product',
+    cart: 'cart',
+    blog: 'blog',
+    article: 'article',
+    search: 'search',
+    password: 'password',
+    'gift card': 'gift_card',
+    'gift_card': 'gift_card',
+    '404': '404',
+    page: 'page'
+};
+
+/**
+ * Infers which ThemeState template an edit request is actually about, by
+ * matching keywords in the message against known template keys (falling
+ * back to 'index' — the homepage — when nothing more specific matches or
+ * the guessed template isn't present in this theme). Without this, every
+ * edit request was routed to 'index' regardless of what it mentioned, so a
+ * request like "change the footer text" would silently edit an unrelated
+ * homepage section instead of sections/footer-group.json.
+ */
+function inferTemplateName(message, themeState) {
+    const lower = (message || '').toLowerCase();
+    const availableTemplates = (themeState && themeState.templates) || {};
+    const keywords = Object.keys(TEMPLATE_KEYWORD_ALIASES).sort((a, b) => b.length - a.length);
+    for (const keyword of keywords) {
+        const pattern = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+        if (pattern.test(lower)) {
+            const candidate = TEMPLATE_KEYWORD_ALIASES[keyword];
+            if (availableTemplates[candidate]) return candidate;
+        }
+    }
+    return 'index';
+}
+
+/**
+ * Runs an interactive, multi-turn editing session against the CURRENT live
+ * theme (built fresh from disk via theme-state.js's buildThemeState(), not
+ * the AI's own output/ staging area), driving runConversationalEdit()'s
+ * existing clarification / follow-up / cancel state machine (Phase 8
+ * edit-pipeline.js + Phase 9 conversational-edit.js) through the same
+ * "print the AI's question, read the answer, loop" shape
+ * runStagedPipeline() already uses for initial generation. The engine
+ * already resolves ambiguous targets, follow-ups ("make it blue too"), and
+ * bounded multi-clause edits — this only wires it to the CLI, which
+ * previously never required either file.
+ */
+async function runEditSession(initialMessage) {
+    const { runConversationalEdit } = require('./conversational-edit');
+    const { buildThemeState, DEFAULT_THEME_ROOT } = require('./theme-state');
+    const { loadSchemas } = require('./example-implementation');
+
+    console.log('\n📚 Loading current theme + AI schemas...');
+    const [schemas, themeState] = await Promise.all([
+        loadSchemas(),
+        buildThemeState({ themeRoot: DEFAULT_THEME_ROOT })
+    ]);
+    console.log(`✅ ${themeState.meta.templateCount} template(s), ${themeState.meta.sectionCount} section(s) loaded\n`);
+
+    let sessionId = null;
+    // Only the first call seeds themeState explicitly (this menu never has
+    // a prior saved session for a fresh sessionId); every call after that
+    // omits it so runConversationalEdit() loads whatever the previous turn
+    // in THIS session just saved (conversational-edit.js's own §21
+    // continuity contract).
+    let seedThemeState = themeState;
+    let message = initialMessage;
+
+    while (true) {
+        if (/^(exit|done|quit|stop)$/i.test(message.trim())) {
+            console.log('\n👋 Ending edit session.\n');
+            return;
+        }
+
+        const result = await runConversationalEdit(message, {
+            sessionId,
+            schemas,
+            themeState: seedThemeState,
+            templateName: inferTemplateName(message, themeState),
+            autoApply: true,
+            themeRoot: DEFAULT_THEME_ROOT
+        });
+        sessionId = result.sessionId;
+        seedThemeState = undefined;
+
+        if (result.status === 'NEEDS_CLARIFICATION') {
+            console.log('\n❓ ' + result.questions[0]);
+            result.questions.slice(1).forEach(q => console.log('   ' + q));
+            message = await prompt('\n> ');
+            continue;
+        }
+
+        if (result.status === 'INITIAL_GENERATION') {
+            console.log('\nℹ️  That sounds like a request for a brand-new theme, not an edit to the current one — use option 1-5 from the main menu for that instead.\n');
+            message = await prompt('What would you like to change instead? (or type "exit")\n> ');
+            continue;
+        }
+
+        if (result.status === 'IDLE') {
+            console.log(`\n${result.message || "Okay, cleared that."}\n`);
+            message = await prompt('Anything else to change? (or type "exit")\n> ');
+            continue;
+        }
+
+        if (result.status === 'FAILED') {
+            console.log('\n❌ Could not apply that change:');
+            (result.errors || []).forEach(e => console.log(`   - [${e.code}] ${e.path ? e.path + ': ' : ''}${e.message}`));
+            message = await prompt('\nTry rephrasing, or type "exit"\n> ');
+            continue;
+        }
+
+        if (result.status === 'TOO_MANY_OPERATIONS') {
+            console.log(`\n⚠️  ${result.message}\n`);
+            message = await prompt('> ');
+            continue;
+        }
+
+        // PROPOSED / APPLIED / DRY_RUN
+        const summaries = result.changeSummaries || (result.changeSummary ? [result.changeSummary] : []);
+        const verb = result.status === 'APPLIED' ? 'Applied' : result.status === 'DRY_RUN' ? 'Would apply (dry run)' : 'Proposed';
+        console.log(`\n✅ ${verb}:`);
+        summaries.forEach(s => console.log(`   - ${s.operation} on ${s.target} (${s.changed.join(', ')})`));
+        if (result.applyResult && result.applyResult.filesWritten && result.applyResult.filesWritten.length) {
+            console.log(`   Files updated: ${result.applyResult.filesWritten.join(', ')}`);
+        }
+
+        message = await prompt('\nAnything else to change? (Enter or "exit" to finish)\n> ');
+        if (!message.trim()) {
+            console.log('\n👋 Ending edit session.\n');
+            return;
+        }
+    }
+}
+
+/**
  * Main interactive flow
  */
 async function main() {
@@ -238,9 +403,9 @@ async function main() {
                     }
 
                     console.log('🚀 Generating homepage...\n');
-                    await runFullPipeline(selectedHomepagePrompt.trim(), { 
+                    await runStagedPipeline(selectedHomepagePrompt.trim(), {
                         templateName: 'index',
-                        autoCopy: true 
+                        autoCopy: true
                     });
                     await prompt('\n✅ Done! Press Enter to continue...');
                     break;
@@ -268,9 +433,9 @@ async function main() {
                     }
 
                     console.log('🚀 Generating product page...\n');
-                    await runFullPipeline(selectedProductPrompt.trim(), { 
+                    await runStagedPipeline(selectedProductPrompt.trim(), {
                         templateName: 'product',
-                        autoCopy: true 
+                        autoCopy: true
                     });
                     await prompt('\n✅ Done! Press Enter to continue...');
                     break;
@@ -301,15 +466,15 @@ async function main() {
                     }
 
                     console.log('🚀 Generating homepage...\n');
-                    await runFullPipeline(homepagePrompt3.trim(), { 
+                    await runStagedPipeline(homepagePrompt3.trim(), {
                         templateName: 'index',
-                        autoCopy: true 
+                        autoCopy: true
                     });
-                    
+
                     console.log('\n🚀 Generating product page...\n');
-                    await runFullPipeline(productPrompt3.trim(), { 
+                    await runStagedPipeline(productPrompt3.trim(), {
                         templateName: 'product',
-                        autoCopy: true 
+                        autoCopy: true
                     });
                     await prompt('\n✅ Done! Press Enter to continue...');
                     break;
@@ -325,15 +490,16 @@ async function main() {
                         break;
                     }
                     console.log('\n🚀 Generating homepage...\n');
-                    await runFullPipeline(customHomepagePrompt.trim(), { autoCopy: true });
+                    await runStagedPipeline(customHomepagePrompt.trim(), { autoCopy: true });
                     await prompt('\n✅ Done! Press Enter to continue...');
                     break;
 
                 case '5':
                     // Custom homepage prompt with Phase 3 clarification loop.
-                    // Real Q&A loop (supersedes the canned niche picklist for
-                    // this path only — options 1-4 are left exactly as they
-                    // were, per the phase's own rollback requirement).
+                    // Now identical in effect to option 4 — runStagedPipeline()
+                    // drives the same clarification loop for every generation
+                    // path, so this option is kept only for menu-copy
+                    // continuity.
                     const initialDescription = await prompt(
                         '\n📝 Describe your store:\n> '
                     );
@@ -343,23 +509,7 @@ async function main() {
                         break;
                     }
 
-                    let understanding = await understandRequest(initialDescription.trim());
-                    let rounds = 0;
-                    while (understanding.status === 'NEEDS_CLARIFICATION' && rounds < 5) {
-                        console.log('\n❓ A few quick questions before we generate your store:\n');
-                        understanding.questions.forEach((q, i) => console.log(`   ${i + 1}. ${q}`));
-                        const answer = await prompt('\n> ');
-                        understanding = await understandRequest(answer.trim(), { sessionId: understanding.sessionId });
-                        rounds++;
-                    }
-
-                    if (understanding.status !== 'READY') {
-                        console.log('\n⚠️  Could not fully resolve requirements after several rounds — generating with what we have.\n');
-                    } else {
-                        console.log('\n✅ Got it! Generating your store...\n');
-                    }
-
-                    await runFullPipeline(initialDescription.trim(), { autoCopy: true });
+                    await runStagedPipeline(initialDescription.trim(), { autoCopy: true });
                     await prompt('\n✅ Done! Press Enter to continue...');
                     break;
 
@@ -385,13 +535,31 @@ async function main() {
                     break;
 
                 case '8':
+                    // Edit an existing section — Phase 8/9's targeted-edit
+                    // engine (edit-pipeline.js/conversational-edit.js),
+                    // previously reachable only from tests, now wired into
+                    // the CLI. Handles ambiguous targets, follow-ups, and
+                    // multi-turn conversation itself; see runEditSession().
+                    const editRequest = await prompt(
+                        '\n✏️  What would you like to change? (e.g. "Change the hero heading to Summer Sale")\n> '
+                    );
+                    if (!editRequest.trim()) {
+                        console.log('❌ Nothing entered.');
+                        await prompt('Press Enter to continue...');
+                        break;
+                    }
+                    await runEditSession(editRequest.trim());
+                    await prompt('Press Enter to continue...');
+                    break;
+
+                case '9':
                     // Exit
                     console.log('\n👋 Goodbye!\n');
                     rl.close();
                     return;
 
                 default:
-                    console.log('\n❌ Invalid option. Please choose 1-8.\n');
+                    console.log('\n❌ Invalid option. Please choose 1-9.\n');
                     await prompt('Press Enter to continue...');
             }
         }
@@ -407,4 +575,4 @@ if (require.main === module) {
     main().catch(console.error);
 }
 
-module.exports = { showMenu, getNichePrompt, resolveNicheTemplatePrompt, rl };
+module.exports = { showMenu, getNichePrompt, resolveNicheTemplatePrompt, runStagedPipeline, runEditSession, rl };

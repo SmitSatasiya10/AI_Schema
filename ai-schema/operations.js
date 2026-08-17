@@ -100,6 +100,26 @@ function tokenize(text) {
     return (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
 }
 
+// Generic filler/structural words that carry no target-identifying signal
+// on their own but can still coincidentally equal a real candidate token
+// (e.g. "section" is itself a token inside the section TYPE id
+// "section-divider") — left unfiltered, a vague request like "change one
+// section" would token-match that unrelated type and silently RESOLVE
+// instead of correctly finding nothing to match on. Only applied to the
+// QUERY side of scoring; candidate id/type/label/tag tokens are left
+// untouched so an explicit, specific mention (e.g. "the divider") still
+// matches normally.
+const RESOLUTION_STOP_WORDS = new Set([
+    'i', 'want', 'to', 'the', 'a', 'an', 'of', 'on', 'for', 'my', 'this', 'that', 'it',
+    'please', 'would', 'like', 'me', 'can', 'you',
+    'change', 'update', 'edit', 'modify', 'set', 'remove', 'delete', 'add', 'move', 'replace',
+    'one', 'some', 'section', 'block'
+]);
+
+function queryTokenize(text) {
+    return tokenize(text).filter(token => !RESOLUTION_STOP_WORDS.has(token));
+}
+
 function candidateTokens(id, typeEntry) {
     const parts = [id, typeEntry ? typeEntry.id : '', typeEntry ? typeEntry.label : '', typeEntry ? typeEntry.category : '', ...(typeEntry && typeEntry.tags ? typeEntry.tags : [])];
     return new Set(tokenize(parts.join(' ')));
@@ -134,7 +154,7 @@ function resolveSectionTarget(themeState, templateName, query, schemas) {
 
     const index = buildCapabilityIndex(schemas);
     const sectionTypeById = new Map(index.sections.map(s => [s.id, s]));
-    const queryTokens = tokenize(query);
+    const queryTokens = queryTokenize(query);
     if (queryTokens.length === 0) return { status: 'NOT_FOUND' };
 
     const scored = Object.entries(template.raw.sections).map(([sectionId, section]) => {
@@ -162,7 +182,7 @@ function resolveBlockTarget(section, query, schemas) {
 
     const index = buildCapabilityIndex(schemas);
     const blockTypeById = new Map(index.blocks.map(b => [b.id, b]));
-    const queryTokens = tokenize(query);
+    const queryTokens = queryTokenize(query);
     if (queryTokens.length === 0) return { status: 'NOT_FOUND' };
 
     const scored = Object.entries(blocks).map(([blockId, block]) => {

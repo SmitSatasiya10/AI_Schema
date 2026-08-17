@@ -1,34 +1,39 @@
 {
   "sections": {
-    "hero-slideshow": {
+    "hero": {
       "type": "slideshow",
       "settings": {
+        "visibility": "always-display",
         "slide_height": "large",
-        "auto_rotate": "true",
         "slider_visual": "dots",
+        "auto_rotate": "true",
         "show_text_below": "false"
       },
       "blocks": {
         "slide-1": {
           "type": "slide",
           "settings": {
-            "heading": "Plant-Based Perfection",
-            "subheading": "Delicious Vegan Alternatives",
-            "text": "<p>Discover mouthwatering plant-based proteins that satisfy every craving. 100% cruelty-free, packed with flavor, and better for the planet.</p>",
-            "button_label": "Shop Collection",
-            "button_link": "/collections/all",
-            "content_position": "center-left"
+            "image": "",
+            "heading": "Farm Fresh Vegetables",
+            "subheading": "Direct from local farms to your table",
+            "text": "<p>Discover the crisp taste of organically grown produce, harvested daily for maximum freshness and nutrition.</p>",
+            "button_label": "Shop Now",
+            "button_link": "",
+            "text_color": "#3E3633",
+            "content_position": "center"
           }
         },
         "slide-2": {
           "type": "slide",
           "settings": {
-            "heading": "Nutrition Without Compromise",
-            "subheading": "High Protein, Zero Guilt",
-            "text": "<p>Our signature vegan chicken delivers 20g protein per serving with zero cholesterol. Fuel your body with clean, sustainable nutrition.</p>",
-            "button_label": "View Products",
-            "button_link": "/collections/protein",
-            "content_position": "center-right"
+            "image": "",
+            "heading": "Seasonal Tomatoes & Lemons",
+            "subheading": "Sun-ripened and bursting with flavor",
+            "text": "<p>From zesty lemons to juicy tomatoes, experience nature's candy at its peak ripeness.</p>",
+            "button_label": "View Produce",
+            "button_link": "",
+            "text_color": "#3E3633",
+            "content_position": "center"
           }
         }
       },
@@ -37,134 +42,100 @@
         "slide-2"
       ]
     },
-    "certifications-ticker": {
+    "ticker": {
       "type": "horizontal-ticker",
       "settings": {
-        "speed": 4,
+        "speed": 3,
         "direction": "normal",
         "pause_on_hover": true
       },
       "blocks": {
-        "ticker-1": {
+        "text-1": {
           "type": "text",
           "settings": {
-            "text": "<p>🌱 100% Plant-Based Certified</p>"
+            "text": "<p>🥬 Fresh Daily Harvest</p>"
           }
         },
-        "ticker-2": {
+        "text-2": {
           "type": "text",
           "settings": {
-            "text": "<p>🌿 USDA Organic Ingredients</p>"
+            "text": "<p>🚚 Free Local Delivery</p>"
           }
         },
-        "ticker-3": {
+        "text-3": {
           "type": "text",
           "settings": {
-            "text": "<p>🐰 Cruelty-Free & Vegan Society Approved</p>"
-          }
-        },
-        "ticker-4": {
-          "type": "text",
-          "settings": {
-            "text": "<p>💚 Non-GMO Project Verified</p>"
-          }
-        },
-        "ticker-5": {
-          "type": "text",
-          "settings": {
-            "text": "<p>♻️ Carbon Neutral Shipping</p>"
-          }
-        },
-        "ticker-6": {
-          "type": "text",
-          "settings": {
-            "text": "<p>🌍 1% for the Planet Member</p>"
-          }
-        },
-        "ticker-7": {
-          "type": "text",
-          "settings": {
-            "text": "<p>🏆 Award-Winning Taste 2024</p>"
-          }
-        },
-        "ticker-8": {
-          "type": "text",
-          "settings": {
-            "text": "<p>🥗 Chef's Choice Recommended</p>"
+            "text": "<p>🌱 100% Organic Certified</p>"
           }
         }
       },
       "block_order": [
-        "ticker-1",
-        "ticker-2",
-        "ticker-3",
-        "ticker-4",
-        "ticker-5",
-        "ticker-6",
-        "ticker-7",
-        "ticker-8"
+        "text-1",
+        "text-2",
+        "text-3"
       ]
     },
-    "benefits-icons": {
+    "benefits": {
       "type": "icon-bar",
       "settings": {
-        "title": "Why Choose Plant-Based?",
-        "text": "<p>Every bite makes a difference for your health, the animals, and our planet</p>",
+        "title": "Why Choose Smit",
+        "text": "<p>We're committed to bringing you the freshest organic produce with sustainable farming practices.</p>",
+        "title_highlight_1_color": "#B76E79",
         "columns_desktop": 4,
-        "icon_size": "large",
+        "icon_size": "medium",
         "alignment": "center",
         "icon_layout": "vertical"
       },
       "blocks": {
-        "benefit-1": {
+        "column-1": {
           "type": "column",
           "settings": {
+            "title": "Free Delivery",
+            "text": "<p>On orders over $35</p>",
+            "icon": "local_shipping",
+            "filled_icon": true
+          }
+        },
+        "column-2": {
+          "type": "column",
+          "settings": {
+            "title": "Organic Certified",
+            "text": "<p>Pesticide-free produce</p>",
             "icon": "eco",
-            "filled_icon": true,
-            "title": "Planet Friendly",
-            "text": "<p>Our products produce 90% less carbon emissions than traditional meat alternatives</p>"
+            "filled_icon": true
           }
         },
-        "benefit-2": {
+        "column-3": {
           "type": "column",
           "settings": {
-            "icon": "favorite",
-            "filled_icon": true,
-            "title": "Heart Healthy",
-            "text": "<p>Zero cholesterol and rich in fiber to support cardiovascular wellness</p>"
+            "title": "Daily Harvest",
+            "text": "<p>Picked every morning</p>",
+            "icon": "schedule",
+            "filled_icon": true
           }
         },
-        "benefit-3": {
+        "column-4": {
           "type": "column",
           "settings": {
-            "icon": "restaurant",
-            "filled_icon": true,
-            "title": "Chef Crafted",
-            "text": "<p>Developed by culinary experts to deliver authentic taste and texture</p>"
-          }
-        },
-        "benefit-4": {
-          "type": "column",
-          "settings": {
+            "title": "Quality Guaranteed",
+            "text": "<p>Freshness you can taste</p>",
             "icon": "verified",
-            "filled_icon": true,
-            "title": "Clean Label",
-            "text": "<p>No artificial preservatives, colors, or flavors—just real food</p>"
+            "filled_icon": true
           }
         }
       },
       "block_order": [
-        "benefit-1",
-        "benefit-2",
-        "benefit-3",
-        "benefit-4"
+        "column-1",
+        "column-2",
+        "column-3",
+        "column-4"
       ]
     },
-    "featured-products": {
+    "products-main": {
       "type": "featured-collection",
       "settings": {
-        "title": "Shop Bestsellers",
-        "collection": "vegan-proteins",
+        "title": "Fresh from the Farm",
+        "collection": "",
         "products_to_show": 4,
         "columns_desktop": 4,
         "columns_mobile": "2",
@@ -173,51 +144,111 @@
         "show_secondary_image": "true",
         "show_vendor": "false",
         "enable_quick_add": "true"
-      }
+      },
+      "blocks": {}
     },
-    "lifestyle-story": {
+    "story": {
       "type": "image-with-text",
       "settings": {
-        "height": "large",
+        "image": "",
+        "height": "medium",
         "layout": "image_first",
         "desktop_content_position": "middle",
         "desktop_content_alignment": "left",
-        "mobile_content_alignment": "left"
+        "mobile_content_alignment": "center"
       },
       "blocks": {
-        "story-heading": {
+        "heading-1": {
           "type": "heading",
           "settings": {
-            "title": "From Farm to Fork, 100% Compassionate",
+            "title": "Our Farm Story",
             "heading_size": "h2"
           }
         },
-        "story-text": {
+        "text-1": {
           "type": "text",
           "settings": {
-            "text": "<p>We believe food should nourish both body and soul. Our journey began in a small kitchen with a simple mission: create plant-based alternatives so delicious, even dedicated meat-lovers make the switch. Today, we're proud to serve millions of families who choose kindness without sacrificing flavor.</p>"
+            "text": "<p>Founded in 1985, Smit Family Farms has been serving our community with the freshest vegetables for over three generations. We believe in sustainable farming practices that respect the land and deliver exceptional flavor to your kitchen.</p>"
           }
         },
-        "story-button": {
+        "button-1": {
           "type": "button",
           "settings": {
-            "button_label": "Read Our Story",
-            "button_link": "/pages/about-us",
+            "button_label": "Learn More About Us",
+            "link": "",
             "button_style_secondary": "false"
+          }
+        },
+        "image-1": {
+          "type": "image",
+          "settings": {
+            "image": "",
+            "width": 100,
+            "alignment": "center"
           }
         }
       },
       "block_order": [
-        "story-heading",
-        "story-text",
-        "story-button"
+        "heading-1",
+        "text-1",
+        "button-1",
+        "image-1"
       ]
     },
-    "customer-love": {
+    "break-1": {
+      "type": "section-divider",
+      "settings": {
+        "divider_style": "wave",
+        "divider_height": 2,
+        "divider_color": "#C9A87C",
+        "show_divider": "true"
+      },
+      "blocks": {}
+    },
+    "highlights": {
+      "type": "collage",
+      "settings": {
+        "title": "This Week's Specials",
+        "heading": "Featured Produce",
+        "desktop_layout": "left",
+        "mobile_layout": "collage"
+      },
+      "blocks": {
+        "product-1": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": true
+          }
+        },
+        "image-1": {
+          "type": "image",
+          "settings": {
+            "image": "",
+            "width": 100,
+            "alignment": "center"
+          }
+        },
+        "product-2": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": true
+          }
+        }
+      },
+      "block_order": [
+        "product-1",
+        "image-1",
+        "product-2"
+      ]
+    },
+    "reviews": {
       "type": "testimonials",
       "settings": {
-        "title": "Loved by the Vegan Community",
-        "cards_color_scheme": "background-1",
+        "title": "What Our Customers Say",
+        "visibility": "always-display",
+        "cards_color_scheme": "background-2",
         "column_alignment": "center",
         "image_ratio": "circle",
         "columns_desktop": 3,
@@ -225,220 +256,90 @@
         "show_quotes": "true"
       },
       "blocks": {
-        "review-1": {
+        "column-1": {
           "type": "column",
           "settings": {
-            "title": "Better Than Real Chicken",
-            "text": "<p>I was skeptical about plant-based meat, but this tastes better than the real thing! My whole family requests the crispy tenders weekly. Game changer!</p>",
+            "title": "Best tomatoes ever!",
+            "text": "<p>I've never tasted tomatoes this sweet and juicy. Smit's produce reminds me of my grandmother's garden.</p>",
             "author": "Sarah M.",
+            "image": "",
             "star_rating": 5
           }
         },
-        "review-2": {
+        "column-2": {
           "type": "column",
           "settings": {
-            "title": "Finally, Real Texture",
-            "text": "<p>As a former meat-eater transitioning to veganism, finding alternatives with the right texture was hard. These products have the perfect bite and seasoning.</p>",
-            "author": "Marcus T.",
+            "title": "Incredible freshness",
+            "text": "<p>The vegetables stay fresh for weeks! You can tell they were picked just hours before delivery.</p>",
+            "author": "James K.",
+            "image": "",
             "star_rating": 5
           }
         },
-        "review-3": {
+        "column-3": {
           "type": "column",
           "settings": {
-            "title": "My Kids Love It",
-            "text": "<p>Getting my children to eat healthy was always a battle until we found these nuggets. They ask for them by name and I feel good about the ingredients.</p>",
-            "author": "Jennifer K.",
+            "title": "Amazing quality",
+            "text": "<p>Finally, a place where organic actually means flavorful. The lemons are perfect for my baking.</p>",
+            "author": "Maria L.",
+            "image": "",
             "star_rating": 5
           }
         }
       },
       "block_order": [
-        "review-1",
-        "review-2",
-        "review-3"
+        "column-1",
+        "column-2",
+        "column-3"
       ]
     },
-    "nutrition-impact": {
-      "type": "results",
-      "settings": {
-        "title": "The Power of Plants",
-        "text": "<p>Real results from our community of plant-based eaters who made the switch</p>",
-        "style": "number",
-        "result_layout": "horizontal",
-        "layout": "results_first",
-        "enable_animations": "true",
-        "animation_duration": 600
-      },
-      "blocks": {
-        "stat-1": {
-          "type": "row",
-          "settings": {
-            "percentage": 94,
-            "row_heading": "Reported Better Digestion",
-            "row_text": "<p>Within 30 days of switching to our plant-based proteins</p>"
-          }
-        },
-        "stat-2": {
-          "type": "row",
-          "settings": {
-            "percentage": 87,
-            "row_heading": "Maintained Muscle Mass",
-            "row_text": "<p>Athletes reported sustained performance with our high-protein options</p>"
-          }
-        },
-        "stat-3": {
-          "type": "row",
-          "settings": {
-            "percentage": 98,
-            "row_heading": "Would Recommend",
-            "row_text": "<p>Customers say they recommend our products to friends and family</p>"
-          }
-        }
-      },
-      "block_order": [
-        "stat-1",
-        "stat-2",
-        "stat-3"
-      ]
-    },
-    "nutrition-tabs": {
-      "type": "content-tabs",
-      "settings": {
-        "title": "Complete Nutrition Guide",
-        "tabs_style": "pills",
-        "tab_alignment": "center"
-      },
-      "blocks": {
-        "tab-ingredients": {
-          "type": "tab",
-          "settings": {
-            "title": "Clean Ingredients",
-            "btn_label": "What's Inside",
-            "btn_icon": "spa",
-            "filled_btn_icon": true,
-            "heading": "Simple, Recognizable Ingredients",
-            "text": "<p>We use whole food ingredients you can pronounce: pea protein, wheat gluten, nutritional yeast, and natural spices. No mystery chemicals, no artificial binders—just plants doing what plants do best.</p>",
-            "button_label": "View Full Ingredient List",
-            "button_link": "/pages/ingredients"
-          }
-        },
-        "tab-protein": {
-          "type": "tab",
-          "settings": {
-            "title": "High Protein",
-            "btn_label": "Protein Content",
-            "btn_icon": "fitness_center",
-            "filled_btn_icon": true,
-            "heading": "Complete Amino Acid Profile",
-            "text": "<p>Each serving delivers 20-25g of complete protein with all nine essential amino acids. Our blend of pea and wheat proteins ensures optimal bioavailability for muscle synthesis and recovery.</p>",
-            "button_label": "Compare Nutrition Facts",
-            "button_link": "/pages/nutrition"
-          }
-        },
-        "tab-sustainability": {
-          "type": "tab",
-          "settings": {
-            "title": "Eco Impact",
-            "btn_label": "Sustainability",
-            "btn_icon": "public",
-            "filled_btn_icon": true,
-            "heading": "Eating for the Planet",
-            "text": "<p>Choosing our plant-based chicken over conventional meat saves 1,800 gallons of water per pound. Our packaging is 100% compostable and we offset 100% of shipping emissions through verified carbon credits.</p>",
-            "button_label": "See Our Impact Report",
-            "button_link": "/pages/sustainability"
-          }
-        }
-      },
-      "block_order": [
-        "tab-ingredients",
-        "tab-protein",
-        "tab-sustainability"
-      ]
-    },
-    "lifestyle-collage": {
-      "type": "collage",
-      "settings": {
-        "title": "Plant-Based Living",
-        "heading": "Inspiration for Your Kitchen",
-        "desktop_layout": "left",
-        "mobile_layout": "collage"
-      },
-      "blocks": {
-        "collage-image-1": {
-          "type": "image",
-          "settings": {
-            "image": ""
-          }
-        },
-        "collage-image-2": {
-          "type": "image",
-          "settings": {
-            "image": ""
-          }
-        },
-        "collage-product": {
-          "type": "product",
-          "settings": {
-            "product": "signature-vegan-chicken",
-            "second_image": true
-          }
-        }
-      },
-      "block_order": [
-        "collage-image-1",
-        "collage-image-2",
-        "collage-product"
-      ]
-    },
-    "newsletter-signup": {
+    "signup": {
       "type": "newsletter",
       "settings": {
         "button_type": "solid",
-        "button_label": "Join the Movement",
+        "button_label": "Subscribe",
         "button_style_secondary": "false",
         "full_width": "false",
         "color_scheme": "accent-1"
       },
       "blocks": {
-        "newsletter-heading": {
+        "heading-1": {
           "type": "heading",
           "settings": {
-            "title": "Get 15% Off Your First Order",
+            "title": "Join the Smit Family",
             "heading_size": "h2"
           }
         },
-        "newsletter-text": {
+        "paragraph-1": {
           "type": "paragraph",
           "settings": {
-            "text": "<p>Join 50,000+ subscribers for exclusive recipes, nutrition tips, and early access to new products. Plus, get 15% off your first purchase instantly.</p>"
+            "text": "<p>Subscribe for weekly harvest updates, seasonal recipes, and exclusive offers on farm-fresh vegetables.</p>"
           }
         },
-        "email-form": {
+        "email_form-1": {
           "type": "email_form",
           "settings": {
-            "placeholder": "Enter your email address",
-            "button_label": "Subscribe"
+            "placeholder": "Enter your email",
+            "button_label": "Sign Up"
           }
         }
       },
       "block_order": [
-        "newsletter-heading",
-        "newsletter-text",
-        "email-form"
+        "heading-1",
+        "paragraph-1",
+        "email_form-1"
       ]
     }
   },
   "order": [
-    "hero-slideshow",
-    "certifications-ticker",
-    "benefits-icons",
-    "featured-products",
-    "lifestyle-story",
-    "customer-love",
-    "nutrition-impact",
-    "nutrition-tabs",
-    "lifestyle-collage",
-    "newsletter-signup"
+    "hero",
+    "ticker",
+    "benefits",
+    "products-main",
+    "story",
+    "break-1",
+    "highlights",
+    "reviews",
+    "signup"
   ]
 }

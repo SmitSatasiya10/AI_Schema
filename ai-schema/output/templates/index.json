@@ -15,45 +15,14 @@
           "settings": {
             "image": ""
           }
-        },
-        "slide-2": {
-          "type": "slide",
-          "settings": {
-            "image": ""
-          }
         }
       },
       "block_order": [
-        "slide-1",
-        "slide-2"
-      ]
-    },
-    "testimonials-1": {
-      "type": "testimonials",
-      "settings": {},
-      "blocks": {
-        "col-1": {
-          "type": "column",
-          "settings": {}
-        },
-        "col-2": {
-          "type": "column",
-          "settings": {}
-        },
-        "col-3": {
-          "type": "column",
-          "settings": {}
-        }
-      },
-      "block_order": [
-        "col-1",
-        "col-2",
-        "col-3"
+        "slide-1"
       ]
     }
   },
   "order": [
-    "hero-1",
-    "testimonials-1"
+    "hero-1"
   ]
 }
