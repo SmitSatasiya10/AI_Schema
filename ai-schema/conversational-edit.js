@@ -218,7 +218,14 @@ function splitBoundedClauses(message) {
 
 const GENERIC_INTENT_WORDS = new Set([
     'the', 'a', 'an', 'to', 'of', 'on', 'for', 'my', 'this', 'that', 'it',
-    'please', 'i', 'want', 'would', 'like', 'me', 'can', 'you'
+    'please', 'i', 'want', 'would', 'like', 'me', 'can', 'you', 'need',
+    // Structural/vague nouns naming WHAT KIND of thing is being touched
+    // (already established by the resolved target itself), not WHAT the
+    // new value should be — "change one section content" leaves only
+    // these after generic-word/verb stripping, which used to read as
+    // "real" intent and skip straight to an AI call with nothing to go
+    // on, so the AI invented content on its own instead of asking.
+    'one', 'some', 'section', 'block', 'content'
 ]);
 
 function tokenize(text) {
@@ -506,18 +513,36 @@ async function runConversationalEdit(message, options = {}) {
         return { status: returnedStatus, sessionId: finalSession.sessionId, ...publicExtra };
     }
 
+    // A NEEDS_CLARIFICATION/FAILED turn never mutates themeState, so nothing
+    // upstream would otherwise persist it — but the NEXT turn (a
+    // CLARIFICATION_ANSWER, or a fresh retry) still calls loadThemeState()
+    // whenever this session isn't given a fresh one explicitly, and that
+    // reads back whatever the LAST *successful* apply — for this themeId,
+    // from ANY session — happened to leave on disk (or nothing at all).
+    // Without re-persisting the exact ThemeState this turn resolved
+    // against, a clarification answer can silently resolve against a
+    // stale/unrelated snapshot instead of the one the question was actually
+    // asked about (e.g. producing a correct-looking "Which section?" list
+    // that doesn't match what a following turn actually sees).
+    async function persistUnmutatedThemeState() {
+        await saveThemeState({ ...themeState, themeId: session.themeId });
+    }
+
     async function handleSingleTurnResult(result, resultSession) {
         if (result.status === 'AMBIGUOUS') {
+            await persistUnmutatedThemeState();
             const pendingClarification = { kind: 'intent' };
-            return finish({ ...resultSession, pendingClarification, pendingQuestion: 'What would you like to change?' }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: ['What would you like to change?'] });
+            return finish({ ...resultSession, pendingClarification, pendingQuestion: 'What would you like to change?', themeStateVersion: currentVersion }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: ['What would you like to change?'] });
         }
         if (result.status === 'NEEDS_CLARIFICATION') {
+            await persistUnmutatedThemeState();
             const kind = result.candidates && result.candidates[0] && 'blockId' in result.candidates[0] ? 'block' : 'section';
             const pendingClarification = { kind, candidates: result.candidates, templateName: result.templateName || ctx.templateName, sectionId: result.sectionId || null, questions: result.questions };
-            return finish({ ...resultSession, pendingClarification, pendingQuestion: result.questions[0] }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: result.questions, candidates: result.candidates });
+            return finish({ ...resultSession, pendingClarification, pendingQuestion: result.questions[0], themeStateVersion: currentVersion }, SESSION_STATES.NEEDS_CLARIFICATION, { questions: result.questions, candidates: result.candidates });
         }
         if (result.status === 'FAILED') {
-            return finish(resultSession, SESSION_STATES.FAILED, { errors: result.errors, operation: result.operation, repaired: result.repaired });
+            await persistUnmutatedThemeState();
+            return finish({ ...resultSession, themeStateVersion: currentVersion }, SESSION_STATES.FAILED, { errors: result.errors, operation: result.operation, repaired: result.repaired });
         }
         // PROPOSED / APPLIED / DRY_RUN — saved keyed by THIS SESSION's
         // themeId, never whatever `.themeId` the input ThemeState object
@@ -542,7 +567,8 @@ async function runConversationalEdit(message, options = {}) {
 
     async function handleMultiTurnResult(result, resultSession) {
         if (result.status === 'FAILED') {
-            return finish(resultSession, SESSION_STATES.FAILED, { errors: result.errors, aiCallCount: result.aiCallCount, repaired: result.repaired });
+            await persistUnmutatedThemeState();
+            return finish({ ...resultSession, themeStateVersion: currentVersion }, SESSION_STATES.FAILED, { errors: result.errors, aiCallCount: result.aiCallCount, repaired: result.repaired });
         }
         await saveThemeState({ ...result.themeState, themeId: resultSession.themeId });
         const lastSummary = result.changeSummaries[result.changeSummaries.length - 1];

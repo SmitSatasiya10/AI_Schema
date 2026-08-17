@@ -1,20 +1,345 @@
 {
   "sections": {
-    "hero-1": {
+    "hero": {
       "type": "slideshow",
-      "settings": {},
+      "settings": {
+        "visibility": "always-display",
+        "slide_height": "large",
+        "slider_visual": "dots",
+        "auto_rotate": "true",
+        "show_text_below": "false"
+      },
       "blocks": {
         "slide-1": {
           "type": "slide",
-          "settings": {}
+          "settings": {
+            "image": "",
+            "heading": "Farm Fresh Vegetables",
+            "subheading": "Direct from local farms to your table",
+            "text": "<p>Discover the crisp taste of organically grown produce, harvested daily for maximum freshness and nutrition.</p>",
+            "button_label": "Shop Now",
+            "button_link": "",
+            "text_color": "#3E3633",
+            "content_position": "center"
+          }
+        },
+        "slide-2": {
+          "type": "slide",
+          "settings": {
+            "image": "",
+            "heading": "Seasonal Tomatoes & Lemons",
+            "subheading": "Sun-ripened and bursting with flavor",
+            "text": "<p>From zesty lemons to juicy tomatoes, experience nature's candy at its peak ripeness.</p>",
+            "button_label": "View Produce",
+            "button_link": "",
+            "text_color": "#3E3633",
+            "content_position": "center"
+          }
         }
       },
       "block_order": [
-        "slide-1"
+        "slide-1",
+        "slide-2"
+      ]
+    },
+    "ticker": {
+      "type": "horizontal-ticker",
+      "settings": {
+        "speed": 3,
+        "direction": "normal",
+        "pause_on_hover": true
+      },
+      "blocks": {
+        "text-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>🥬 Fresh Daily Harvest</p>"
+          }
+        },
+        "text-2": {
+          "type": "text",
+          "settings": {
+            "text": "<p>🚚 Free Local Delivery</p>"
+          }
+        },
+        "text-3": {
+          "type": "text",
+          "settings": {
+            "text": "<p>🌱 100% Organic Certified</p>"
+          }
+        }
+      },
+      "block_order": [
+        "text-1",
+        "text-2",
+        "text-3"
+      ]
+    },
+    "benefits": {
+      "type": "icon-bar",
+      "settings": {
+        "title": "Why Choose Smit",
+        "text": "<p>We're committed to bringing you the freshest organic produce with sustainable farming practices.</p>",
+        "title_highlight_1_color": "#B76E79",
+        "columns_desktop": 4,
+        "icon_size": "medium",
+        "alignment": "center",
+        "icon_layout": "vertical"
+      },
+      "blocks": {
+        "column-1": {
+          "type": "column",
+          "settings": {
+            "title": "Free Delivery",
+            "text": "<p>On orders over $35</p>",
+            "icon": "local_shipping",
+            "filled_icon": true
+          }
+        },
+        "column-2": {
+          "type": "column",
+          "settings": {
+            "title": "Organic Certified",
+            "text": "<p>Pesticide-free produce</p>",
+            "icon": "eco",
+            "filled_icon": true
+          }
+        },
+        "column-3": {
+          "type": "column",
+          "settings": {
+            "title": "Daily Harvest",
+            "text": "<p>Picked every morning</p>",
+            "icon": "schedule",
+            "filled_icon": true
+          }
+        },
+        "column-4": {
+          "type": "column",
+          "settings": {
+            "title": "Quality Guaranteed",
+            "text": "<p>Freshness you can taste</p>",
+            "icon": "verified",
+            "filled_icon": true
+          }
+        }
+      },
+      "block_order": [
+        "column-1",
+        "column-2",
+        "column-3",
+        "column-4"
+      ]
+    },
+    "products-main": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Fresh from the Farm",
+        "collection": "",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "show_view_all": "true",
+        "image_ratio": "square",
+        "show_secondary_image": "true",
+        "show_vendor": "false",
+        "enable_quick_add": "true"
+      },
+      "blocks": {}
+    },
+    "story": {
+      "type": "image-with-text",
+      "settings": {
+        "image": "",
+        "height": "medium",
+        "layout": "image_first",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "mobile_content_alignment": "center"
+      },
+      "blocks": {
+        "heading-1": {
+          "type": "heading",
+          "settings": {
+            "title": "Our Farm Story",
+            "heading_size": "h2"
+          }
+        },
+        "text-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Founded in 1985, Smit Family Farms has been serving our community with the freshest vegetables for over three generations. We believe in sustainable farming practices that respect the land and deliver exceptional flavor to your kitchen.</p>"
+          }
+        },
+        "button-1": {
+          "type": "button",
+          "settings": {
+            "button_label": "Learn More About Us",
+            "link": "",
+            "button_style_secondary": "false"
+          }
+        },
+        "image-1": {
+          "type": "image",
+          "settings": {
+            "image": "",
+            "width": 100,
+            "alignment": "center"
+          }
+        }
+      },
+      "block_order": [
+        "heading-1",
+        "text-1",
+        "button-1",
+        "image-1"
+      ]
+    },
+    "break-1": {
+      "type": "section-divider",
+      "settings": {
+        "divider_style": "wave",
+        "divider_height": 2,
+        "divider_color": "#C9A87C",
+        "show_divider": "true"
+      },
+      "blocks": {}
+    },
+    "highlights": {
+      "type": "collage",
+      "settings": {
+        "title": "This Week's Specials",
+        "heading": "Featured Produce",
+        "desktop_layout": "left",
+        "mobile_layout": "collage"
+      },
+      "blocks": {
+        "product-1": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": true
+          }
+        },
+        "image-1": {
+          "type": "image",
+          "settings": {
+            "image": "",
+            "width": 100,
+            "alignment": "center"
+          }
+        },
+        "product-2": {
+          "type": "product",
+          "settings": {
+            "product": "",
+            "second_image": true
+          }
+        }
+      },
+      "block_order": [
+        "product-1",
+        "image-1",
+        "product-2"
+      ]
+    },
+    "reviews": {
+      "type": "testimonials",
+      "settings": {
+        "title": "What Our Customers Say",
+        "visibility": "always-display",
+        "cards_color_scheme": "background-2",
+        "column_alignment": "center",
+        "image_ratio": "circle",
+        "columns_desktop": 3,
+        "show_stars": "true",
+        "show_quotes": "true"
+      },
+      "blocks": {
+        "column-1": {
+          "type": "column",
+          "settings": {
+            "title": "Best tomatoes ever!",
+            "text": "<p>I've never tasted tomatoes this sweet and juicy. Smit's produce reminds me of my grandmother's garden.</p>",
+            "author": "Sarah M.",
+            "image": "",
+            "star_rating": 5
+          }
+        },
+        "column-2": {
+          "type": "column",
+          "settings": {
+            "title": "Incredible freshness",
+            "text": "<p>The vegetables stay fresh for weeks! You can tell they were picked just hours before delivery.</p>",
+            "author": "James K.",
+            "image": "",
+            "star_rating": 5
+          }
+        },
+        "column-3": {
+          "type": "column",
+          "settings": {
+            "title": "Amazing quality",
+            "text": "<p>Finally, a place where organic actually means flavorful. The lemons are perfect for my baking.</p>",
+            "author": "Maria L.",
+            "image": "",
+            "star_rating": 5
+          }
+        }
+      },
+      "block_order": [
+        "column-1",
+        "column-2",
+        "column-3"
+      ]
+    },
+    "signup": {
+      "type": "newsletter",
+      "settings": {
+        "button_type": "solid",
+        "button_label": "Subscribe",
+        "button_style_secondary": "false",
+        "full_width": "false",
+        "color_scheme": "accent-1"
+      },
+      "blocks": {
+        "heading-1": {
+          "type": "heading",
+          "settings": {
+            "title": "Join the Smit Family",
+            "heading_size": "h2"
+          }
+        },
+        "paragraph-1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Subscribe for weekly harvest updates, seasonal recipes, and exclusive offers on farm-fresh vegetables.</p>"
+          }
+        },
+        "email_form-1": {
+          "type": "email_form",
+          "settings": {
+            "placeholder": "Enter your email",
+            "button_label": "Sign Up"
+          }
+        }
+      },
+      "block_order": [
+        "heading-1",
+        "paragraph-1",
+        "email_form-1"
       ]
     }
   },
   "order": [
-    "hero-1"
+    "hero",
+    "ticker",
+    "benefits",
+    "products-main",
+    "story",
+    "break-1",
+    "highlights",
+    "reviews",
+    "signup"
   ]
 }

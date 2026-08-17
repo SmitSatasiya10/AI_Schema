@@ -223,6 +223,50 @@ async function runStagedPipeline(initialPrompt, pipelineOptions) {
     }
 }
 
+// Maps a keyword found in the user's edit request to the ThemeState
+// template key it actually lives in (e.g. sections/footer-group.json is
+// keyed "footer-group", not "footer"). Checked longest-keyword-first so
+// "header" doesn't shadow a more specific future entry.
+const TEMPLATE_KEYWORD_ALIASES = {
+    footer: 'footer-group',
+    header: 'header-group',
+    'list-collections': 'list-collections',
+    collection: 'collection',
+    product: 'product',
+    cart: 'cart',
+    blog: 'blog',
+    article: 'article',
+    search: 'search',
+    password: 'password',
+    'gift card': 'gift_card',
+    'gift_card': 'gift_card',
+    '404': '404',
+    page: 'page'
+};
+
+/**
+ * Infers which ThemeState template an edit request is actually about, by
+ * matching keywords in the message against known template keys (falling
+ * back to 'index' — the homepage — when nothing more specific matches or
+ * the guessed template isn't present in this theme). Without this, every
+ * edit request was routed to 'index' regardless of what it mentioned, so a
+ * request like "change the footer text" would silently edit an unrelated
+ * homepage section instead of sections/footer-group.json.
+ */
+function inferTemplateName(message, themeState) {
+    const lower = (message || '').toLowerCase();
+    const availableTemplates = (themeState && themeState.templates) || {};
+    const keywords = Object.keys(TEMPLATE_KEYWORD_ALIASES).sort((a, b) => b.length - a.length);
+    for (const keyword of keywords) {
+        const pattern = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+        if (pattern.test(lower)) {
+            const candidate = TEMPLATE_KEYWORD_ALIASES[keyword];
+            if (availableTemplates[candidate]) return candidate;
+        }
+    }
+    return 'index';
+}
+
 /**
  * Runs an interactive, multi-turn editing session against the CURRENT live
  * theme (built fresh from disk via theme-state.js's buildThemeState(), not
@@ -266,7 +310,7 @@ async function runEditSession(initialMessage) {
             sessionId,
             schemas,
             themeState: seedThemeState,
-            templateName: 'index',
+            templateName: inferTemplateName(message, themeState),
             autoApply: true,
             themeRoot: DEFAULT_THEME_ROOT
         });

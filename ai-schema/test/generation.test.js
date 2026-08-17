@@ -111,9 +111,21 @@ test('lightweightCapabilityListing() — strips full settings definitions, keeps
     const listing = lightweightCapabilityListing(indexPool);
     const slideshow = listing.sections.find(s => s.id === 'slideshow');
     assert.ok(slideshow);
-    assert.deepStrictEqual(Object.keys(slideshow).sort(), ['allowedBlockCount', 'hasBlocks', 'id', 'label', 'maxBlocks', 'summary'].sort());
+    assert.deepStrictEqual(Object.keys(slideshow).sort(), ['allowedBlockTypes', 'hasBlocks', 'id', 'label', 'maxBlocks', 'summary'].sort());
     assert.strictEqual(listing.sections.length, indexPool.sectionSchemas.length);
     assert.strictEqual(listing.blocks.length, indexPool.blockSchemas.length);
+});
+
+test('lightweightCapabilityListing() — allowedBlockTypes is the section\'s REAL allowed_blocks list, not just a count — this is what the planner uses to avoid proposing a block a section cannot accept', () => {
+    const listing = lightweightCapabilityListing(indexPool);
+    const slideshow = listing.sections.find(s => s.id === 'slideshow');
+    const testimonials = listing.sections.find(s => s.id === 'testimonials');
+    const collage = listing.sections.find(s => s.id === 'collage');
+    assert.deepStrictEqual(slideshow.allowedBlockTypes, ['slide']);
+    assert.deepStrictEqual(testimonials.allowedBlockTypes, ['column']);
+    assert.deepStrictEqual(collage.allowedBlockTypes.sort(), ['image', 'product'].sort());
+    // A block valid for testimonials must not leak into slideshow's list.
+    assert.ok(!slideshow.allowedBlockTypes.includes('column'));
 });
 
 // ---------------------------------------------------------------------------
