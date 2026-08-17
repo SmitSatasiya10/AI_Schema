@@ -23,13 +23,12 @@ const DEBUG = process.env.DEBUG === 'true';
  * before Phase 2 and remains the default/fallback — see loadSchemas() below.
  *
  * File lists are sorted before reading so iteration order is deterministic
- * across filesystems (fs.readdir() order is not guaranteed). This matters
- * because at least one block id ("row") is currently defined by two files
- * — result_row.json and row.json — and downstream code (validateOutput's
- * blockMap, and this phase's capability index) resolves id collisions via
- * "last one wins"; sorting makes that resolution reproducible instead of
- * depending on OS/filesystem directory order. See PHASE2_REPORT.md "Known
- * limitations" for the duplicate-id finding itself — it is not fixed here.
+ * across filesystems (fs.readdir() order is not guaranteed). This used to
+ * matter for a duplicate block id ("row", defined by both result_row.json
+ * and row.json — see PHASE2_REPORT.md "Known limitations"); that collision
+ * was fixed by merging both into a single flat row.json and deleting
+ * result_row.json, but sorting is kept as good practice for any future
+ * id-keyed lookup over these directories.
  */
 async function loadAllSchemasFromDisk() {
     const schemasDir = __dirname;

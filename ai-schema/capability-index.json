@@ -1,7 +1,7 @@
 {
-  "builtAt": "2026-08-17T07:20:25.403Z",
+  "builtAt": "2026-08-17T08:36:57.331Z",
   "sectionCount": 26,
-  "blockCount": 58,
+  "blockCount": 57,
   "sections": [
     {
       "id": "collage",
@@ -1059,6 +1059,19 @@
       ]
     },
     {
+      "id": "review-avatars",
+      "label": "Review Avatars",
+      "category": "social-proof",
+      "tags": [
+        "reviews"
+      ],
+      "summary": "Display customer avatars with review stats and text for social proof",
+      "scope": "local",
+      "usedBySectionIds": [
+        "main-product"
+      ]
+    },
+    {
       "id": "row",
       "label": "Row",
       "category": "social-proof",
@@ -1071,19 +1084,6 @@
       "usedBySectionIds": [
         "comparison-table",
         "results"
-      ]
-    },
-    {
-      "id": "review-avatars",
-      "label": "Review Avatars",
-      "category": "social-proof",
-      "tags": [
-        "reviews"
-      ],
-      "summary": "Display customer avatars with review stats and text for social proof",
-      "scope": "local",
-      "usedBySectionIds": [
-        "main-product"
       ]
     },
     {

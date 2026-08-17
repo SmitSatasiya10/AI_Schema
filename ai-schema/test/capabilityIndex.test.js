@@ -25,24 +25,31 @@ test('buildCapabilityIndex() — every loaded section schema is represented exac
     }
 });
 
-test('buildCapabilityIndex() — block ids are deduped (known "row" collision resolves to exactly one entry)', () => {
+test('buildCapabilityIndex() — block ids are unique across the catalog (regression guard for the former "row" collision)', () => {
     const index = buildCapabilityIndex(fullSchemas);
-    const uniqueSourceIds = new Set(fullSchemas.blockSchemas.map(b => b.id));
-    // fullSchemas.blockSchemas has one fewer UNIQUE id than total entries
-    // (result_row.json and row.json both declare id "row" — see
-    // PHASE2_REPORT.md). The index must have exactly one entry per unique id.
-    assert.strictEqual(index.blocks.length, uniqueSourceIds.size);
-    assert.ok(uniqueSourceIds.has('row'));
+    const sourceIds = fullSchemas.blockSchemas.map(b => b.id);
+    // result_row.json and row.json used to both declare id "row" (see
+    // PHASE2_REPORT.md "Known limitations"), which shadowed result_row.json's
+    // settings entirely. That was fixed by merging both settings sets into
+    // a single flat row.json and deleting result_row.json — this test
+    // guards against a duplicate id being reintroduced.
+    assert.strictEqual(new Set(sourceIds).size, sourceIds.length, 'no two block schema files should declare the same id');
+    assert.strictEqual(index.blocks.length, sourceIds.length);
     const rowEntries = index.blocks.filter(b => b.id === 'row');
-    assert.strictEqual(rowEntries.length, 1, 'expected exactly one "row" entry in the index despite two source files declaring that id');
+    assert.strictEqual(rowEntries.length, 1);
 });
 
-test('buildCapabilityIndex() — index resolves the "row" id collision to row.json (the richer, dual-purpose definition)', () => {
+test('buildCapabilityIndex() — "row" block exposes flat settings for both results and comparison-table usage', () => {
     const index = buildCapabilityIndex(fullSchemas);
     const rowEntry = index.blocks.find(b => b.id === 'row');
-    // row.json's label is "Row"; result_row.json's label is "Result Row".
-    // Deterministic (sorted-filename, last-wins) resolution should pick row.json.
     assert.strictEqual(rowEntry.label, 'Row');
+    const rowSchema = fullSchemas.blockSchemas.find(b => b.id === 'row');
+    // Flat, top-level keys — not nested under "_for_results_section" /
+    // "_for_comparison_table_section" wrapper objects, which validation.js's
+    // walkSettings() (a flat `blockSchema.settings[key]` lookup) can't see.
+    for (const key of ['percentage', 'row_heading', 'row_text', 'benefit', 'us', 'others', 'others_2', 'others_3']) {
+        assert.ok(key in rowSchema.settings, `expected "row" block settings to include "${key}"`);
+    }
 });
 
 test('buildCapabilityIndex() — every category used is within the closed taxonomy', () => {

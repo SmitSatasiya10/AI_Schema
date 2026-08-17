@@ -105,12 +105,6 @@ const BLOCK_METADATA = {
     'product_title.json': { category: 'product-detail', tags: [] },
     'product_urgency.json': { category: 'conversion', tags: ['urgency'] },
     'rating-stars.json': { category: 'trust-badges', tags: ['rating', 'reviews'] },
-    // result_row.json and row.json both declare id "row" (pre-existing data
-    // issue, not introduced by this migration — see PHASE2_REPORT.md). Both
-    // are classified consistently; loadAllSchemasFromDisk()'s now-sorted
-    // file order makes row.json (the more complete, dual-purpose version)
-    // deterministically win any id collision downstream.
-    'result_row.json': { category: 'social-proof', tags: ['stats'] },
     'review-avatars.json': { category: 'social-proof', tags: ['reviews'] },
     'row.json': { category: 'social-proof', tags: ['stats', 'comparison'] },
     'slide.json': { category: 'hero', tags: [] },
